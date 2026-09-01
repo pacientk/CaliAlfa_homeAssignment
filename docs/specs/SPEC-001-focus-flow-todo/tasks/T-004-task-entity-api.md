@@ -114,3 +114,21 @@ resource is shared and its contents are not guaranteed.
 
 - Epic §10, §13
 - Verified API behaviour: `Tech Assignment/REQUIREMENTS.md` § Verified API behaviour
+
+## Additional scenarios (appended during implementation)
+
+Discovered by the executing agent and by orchestrator probes against the live service:
+
+- A page past the end of the collection returns `200 []`, not 404 — verified at `?p=2&l=1` and
+  `?p=3&l=1` against a one-record collection, and at pages 1, 2, 3 and 5 against an empty one.
+- Omitting `expiresAt` on create makes the service invent a random future date. `null` is
+  honoured on both `POST` and `PUT`; `PUT {"expiresAt": null}` clears an expiry and preserves
+  the other fields. The draft type therefore requires `expiresAt: string | null`.
+- A non-2xx status below 400 classifies as `client`, i.e. terminal. Only reachable if redirects
+  are ever not followed.
+- The strict wire guard fails a whole page when one record is malformed. Deliberate: the
+  resource is shared, and a junk row written by someone else should be loud rather than
+  silently skipped.
+- `jest.config.js` had no `moduleNameMapper`, so no test could import across a layer alias.
+  Fixed here, mirroring the `paths` map in `tsconfig.json` and the `alias` map in
+  `metro.config.js`. No task in the spec owned this file.

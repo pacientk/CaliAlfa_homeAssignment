@@ -112,6 +112,16 @@ No two tasks in any wave write the same file. The layer split is doing its job.
 
 ## 6. Execution waves
 
+### Branching — deviation from the default, recorded
+
+Task agents run in the **single shared working tree**, not on branches off a common base.
+A git worktree per agent would isolate the code but would not carry `node_modules`, so the
+agents could not run the type-check, lint, and test gates that make a hand-off meaningful —
+isolation would be bought by disabling the Definition of Done. The safety that branching
+would have provided comes instead from §5.1: no two tasks in a wave write the same file, and
+that is verified before the wave starts. Each task lands as its own commit after its gates
+pass.
+
 ### Wave 1 — foundations
 
 - **Tasks:** T-001 (tokens), T-004 (entity + API)

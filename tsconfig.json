@@ -2,6 +2,9 @@
   "extends": "@react-native/typescript-config",
   "compilerOptions": {
     "strict": true,
+    // node is needed so tests may read files — a font name table, a built plist.
+    // Without it @react-native/typescript-config excludes fs and Buffer entirely.
+    "types": ["react-native", "jest", "node"],
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "baseUrl": ".",

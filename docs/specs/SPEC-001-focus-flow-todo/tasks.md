@@ -1,7 +1,7 @@
 # SPEC-001 — Tasks
 
 **Parent epic:** [SPEC-001: Focus & Flow — offline-first to-do application](./epic.md)
-**Status:** `not-started`
+**Status:** `in-progress`
 **Created:** 2026-09-01
 **Last updated:** 2026-09-01
 

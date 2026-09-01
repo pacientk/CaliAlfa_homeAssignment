@@ -444,7 +444,17 @@ to this candidate.
 | Delete    | `DELETE /tasks/:id`             |                                                                                                                                                       |
 
 Behaviour verified against the live service on 2026-09-01, including the merge semantics
-and the honouring of client timestamps.
+and the honouring of client timestamps. Two further probes, run during Wave 1, settle
+contract questions the implementation would otherwise have had to guess at:
+
+- **A page past the end of the collection returns `200 []`, not 404.** The first-sync loop can
+  therefore terminate on a short or empty page without special-casing an error.
+- **`expiresAt` must always be sent explicitly on create.** Omitting it does not mean "no
+  expiry" — the service invents a random date roughly a year out, which would silently turn
+  every deadline-free task into one that eventually renders as expired. `null` is honoured on
+  both `POST` and `PUT`, and `PUT {"expiresAt": null}` clears an existing expiry while leaving
+  the other fields intact. `null` is therefore the sentinel for "no expiry" on the wire; the
+  domain type continues to express it as an absent key.
 
 **Errors.** Transport failure and 5xx are retryable. 404 on update or delete means the
 record is gone; the entry is discarded and the local copy removed. Other 4xx are terminal.
