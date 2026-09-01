@@ -19,7 +19,24 @@ const moduleNameMapper = {
   '^@store/(.*)$': '<rootDir>/src/shared/store/$1',
 };
 
+/**
+ * Packages published as untranspiled ES modules, which Jest must transform rather than
+ * `require` as-is. The React Native preset whitelists only `react-native` and
+ * `@react-native*`; every entry below is a runtime dependency of the app shell that ships
+ * `export` syntax in its published output.
+ */
+const ESM_PACKAGES = [
+  '(jest-)?react-native',
+  '@react-native(-community)?',
+  '@react-navigation',
+  'react-native-safe-area-context',
+  'react-native-screens',
+  'react-native-reanimated',
+  '@shopify/flash-list',
+];
+
 module.exports = {
   preset: 'react-native',
   moduleNameMapper,
+  transformIgnorePatterns: [`node_modules/(?!(${ESM_PACKAGES.join('|')})/)`],
 };

@@ -2,17 +2,17 @@
 
 ## Meta
 
-| Field         | Value                                                                                                |
-| ------------- | ---------------------------------------------------------------------------------------------------- |
-| Type          | infra                                                                                                |
-| Size          | M                                                                                                    |
-| Risk          | medium                                                                                               |
-| Status        | not-started                                                                                          |
-| Languages     | TS                                                                                                   |
-| Scope paths   | `src/app/**`, `src/navigation/**`, `src/shared/lib/strings.ts`, `src/screens/**` (placeholders only) |
-| Blocked by    | T-002                                                                                                |
-| Blocks        | T-008, T-009, T-011, T-012                                                                           |
-| Epic sections | §11.1, §9.2                                                                                          |
+| Field         | Value                                                                                                                                                                                                  |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Type          | infra                                                                                                                                                                                                  |
+| Size          | M                                                                                                                                                                                                      |
+| Risk          | medium                                                                                                                                                                                                 |
+| Status        | not-started                                                                                                                                                                                            |
+| Languages     | TS                                                                                                                                                                                                     |
+| Scope paths   | `src/app/**`, `src/navigation/**`, `src/shared/lib/strings.ts`, `src/screens/**` (placeholders only), `App.tsx`, `index.js`, `assets/fonts/**`, `react-native.config.js`, `ios/**` (font linking only) |
+| Blocked by    | T-002                                                                                                                                                                                                  |
+| Blocks        | T-008, T-009, T-011, T-012                                                                                                                                                                             |
+| Epic sections | §11.1, §9.2                                                                                                                                                                                            |
 
 ## Goal
 
@@ -33,6 +33,25 @@ makes the shape legible and gives the boundary lint rule something to enforce.
 - `AppProviders`: theme, safe area, query client.
 - `src/shared/lib/strings.ts` with every user-facing string used by the placeholders.
 - Placeholder screens for all eight destinations.
+
+### Bundle the icon font — carried over from T-002
+
+`AppIcon` renders Material Symbols Outlined ligatures, but only the four Inter files are
+bundled today, so every icon currently renders its ligature name as literal text. Download
+`MaterialSymbolsOutlined` as a static `.ttf`, put it in `assets/fonts/`, re-run
+`npx react-native-asset`, and revert whatever it writes under `android/` — that platform is out
+of scope. Verify the face actually registers rather than assuming it: build, install on the
+simulator, and check the font resolves, the way T-001 verified Inter.
+
+**Nothing on any screen looks right until this lands**, which is why it is here rather than
+deferred.
+
+### Replace the template root
+
+`App.tsx` and the root `__tests__/` are React Native template scaffolding and are currently
+lint-ignored by name in `eslint.config.mjs`. Delete both, point `index.js` at the real app
+root under `src/app/`, and remove those two entries from the lint ignore list. The lint run
+must stay clean afterwards.
 
 ## Out of scope
 

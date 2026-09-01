@@ -121,6 +121,7 @@ export interface RadiusScale {
  */
 export interface SizeScale {
   readonly size20: number;
+  readonly size32: number;
   readonly size36: number;
   readonly size52: number;
   readonly size56: number;

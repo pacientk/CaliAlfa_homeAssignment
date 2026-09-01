@@ -16,6 +16,7 @@
 		AB479121E8BA4CAABB2622DD /* Inter-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 68F703DB5105481CA282D748 /* Inter-Bold.ttf */; };
 		5F2A56950E484D51AA6DF860 /* Inter-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6BCD17C975574A6DBA05D609 /* Inter-Regular.ttf */; };
 		462E7DAB43AD4016B91C1583 /* Inter-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = BE784076C1B542A98F77C63D /* Inter-SemiBold.ttf */; };
+		5D600171B4F94068AE730940 /* MaterialSymbolsOutlined.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 08C74A9EA3C74170BC5281B5 /* MaterialSymbolsOutlined.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,6 +34,7 @@
 		68F703DB5105481CA282D748 /* Inter-Bold.ttf */ = {isa = PBXFileReference; name = "Inter-Bold.ttf"; path = "../assets/fonts/Inter-Bold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 		6BCD17C975574A6DBA05D609 /* Inter-Regular.ttf */ = {isa = PBXFileReference; name = "Inter-Regular.ttf"; path = "../assets/fonts/Inter-Regular.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 		BE784076C1B542A98F77C63D /* Inter-SemiBold.ttf */ = {isa = PBXFileReference; name = "Inter-SemiBold.ttf"; path = "../assets/fonts/Inter-SemiBold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		08C74A9EA3C74170BC5281B5 /* MaterialSymbolsOutlined.ttf */ = {isa = PBXFileReference; name = "MaterialSymbolsOutlined.ttf"; path = "../assets/fonts/MaterialSymbolsOutlined.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -114,6 +116,7 @@
 				68F703DB5105481CA282D748 /* Inter-Bold.ttf */,
 				6BCD17C975574A6DBA05D609 /* Inter-Regular.ttf */,
 				BE784076C1B542A98F77C63D /* Inter-SemiBold.ttf */,
+				08C74A9EA3C74170BC5281B5 /* MaterialSymbolsOutlined.ttf */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -187,6 +190,7 @@
 				AB479121E8BA4CAABB2622DD /* Inter-Bold.ttf in Resources */,
 				5F2A56950E484D51AA6DF860 /* Inter-Regular.ttf in Resources */,
 				462E7DAB43AD4016B91C1583 /* Inter-SemiBold.ttf in Resources */,
+				5D600171B4F94068AE730940 /* MaterialSymbolsOutlined.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

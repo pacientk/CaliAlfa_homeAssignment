@@ -51,11 +51,6 @@ export default tseslint.config(
       'metro.config.js',
       'jest.config.js',
       'babel.config.js',
-      // React Native template scaffolding. Both are deleted in T-003, which
-      // replaces the root component with the real app shell; until then they
-      // would report violations of rules that only apply to our own code.
-      'App.tsx',
-      '__tests__/**',
     ],
   },
 
@@ -89,6 +84,15 @@ export default tseslint.config(
     },
     settings: {
       react: { version: 'detect' },
+      // `boundaries/element-types` can only judge a dependency it can resolve to a file.
+      // Without a resolver it silently classifies every import as unknown and never fires,
+      // which is how the layer rule can look configured and enforce nothing. The TypeScript
+      // resolver reads the `paths` map out of tsconfig.json, so the alias list stays declared
+      // in exactly one place.
+      'import/resolver': {
+        typescript: { project: './tsconfig.json' },
+        node: { extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'] },
+      },
       'boundaries/include': ['src/**/*'],
       'boundaries/elements': [
         { type: 'app', pattern: 'src/app/**' },

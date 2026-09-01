@@ -17,6 +17,8 @@
 export const Sizes = {
   /** 20 — the checkbox, and the divider-height of the phone field's country prefix. */
   size20: 20,
+  /** 32 — the pill behind the active tab-bar icon. */
+  size32: 32,
   /** 36 — the small icon tile on a welcome benefit row. */
   size36: 36,
   /** 52 — the control height: text field, primary button, floating action button, nav bar. */
