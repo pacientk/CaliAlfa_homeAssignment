@@ -65,3 +65,20 @@ tokenised because a single occurrence is not yet a role. If T-009 needs it, add 
 variant rather than composing it inline.
 
 **Source:** T-001 hand-off, 2026-09-01.
+
+## FW-04 — Residual sync race: a drain completing mid-page-fetch
+
+`mergeServerTasks` protects the targets of entries still in the queue. A mutation that drains
+**while** the first sync's pages are in flight is therefore absent from the snapshot the merge
+was computed against, and its record is dropped from the cache until the next app start — the
+write itself reached the server, so nothing is lost permanently.
+
+The common half is closed in the binding layer, which awaits `drain()` before it starts paging.
+The residual window needs a "recently confirmed" protection set inside the engine, which is a
+queue change and therefore outside the binding layer's remit.
+
+**Source:** T-006 hand-off, 2026-09-01; recorded as S-5 in the T-006 task file.
+**Why deferred:** it requires a sync and a drain to overlap, the data reaches the server either
+way, and the next app start restores the record. Closing it means changing the one component
+the spec is judged on, after its 151 tests and 23 mutation checks were signed off.
+**If time allows:** worth doing after Wave 5, with its own mutation check.

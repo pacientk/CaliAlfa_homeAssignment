@@ -105,3 +105,27 @@ transport and the in-memory storage double from T-005.
 
 - Epic §11.2, §11.3
 - Cross-task interface: `T-005 §Types → QueuedMutation, CachedTask`
+
+## Additional scenarios discovered during implementation
+
+- **S-5 — the sync must replay the queue before it pages.** `mergeServerTasks` treats the
+  server's list as authoritative for every record it is not told to protect, and it protects
+  only the targets of entries _still_ queued. A first sync that paged before draining would
+  therefore read a collection that predates its own queue, and a create confirmed a moment
+  later would be erased by the merge that follows. `syncTasks` awaits `drain()` first.
+  Covered by `taskSyncBindings.test.ts` — "replays the queue before it pages".
+  A narrower race survives and is deliberately not handled: a mutation that drains _while_
+  the pages are in flight is absent from the snapshot that was read, and its record is
+  dropped from the cache until the next app start. Closing it needs either a re-read after
+  the drain or a "recently confirmed" protection set in the engine; both are queue changes,
+  which this task may not make.
+- **S-6 — a failed first sync is retried by connectivity, not by a backoff.** The query is
+  `retry: false` and is re-issued by the provider's effect when the sync store reports the
+  device online again. A cold start with no network therefore syncs as soon as the first
+  successful request proves connectivity, rather than after a fixed schedule.
+- **S-7 — the read path is connectivity evidence too.** `syncTasks` reports its outcome to
+  the connectivity service. Without it, a cold start with no network would leave the offline
+  banner dark until the user's first _write_ failed.
+- **S-8 — the sync store must name `lastError` when it writes.** Zustand merges shallowly, so
+  a state object that simply omits a cleared error leaves the previous one on screen. Covered
+  by a paired positive/negative test in `syncStore.test.ts`.
