@@ -18,6 +18,14 @@ export const FontFamily = {
   medium: 'Inter-Medium',
   semiBold: 'Inter-SemiBold',
   bold: 'Inter-Bold',
+  /**
+   * The icon face. Every glyph the design draws is a Material Symbols Outlined ligature, so
+   * an icon is text and its face is a font family like any other — which is why it lives
+   * here rather than as a literal inside the icon primitive. This is a family name and not a
+   * PostScript name because the variable font ships one face; the theme surfaces it as
+   * `iconFontFamily`.
+   */
+  icon: 'Material Symbols Outlined',
 } as const;
 
 /** Weights the design uses. Always paired with the matching `FontFamily` entry. */

@@ -13,9 +13,11 @@ export { lightTheme } from './themes/light';
 export type {
   BorderColors,
   FeedbackColors,
+  IconSizeScale,
   PrimaryColors,
   RadiusScale,
   ShadowTokens,
+  SizeScale,
   SpacingScale,
   SurfaceColors,
   TextColors,

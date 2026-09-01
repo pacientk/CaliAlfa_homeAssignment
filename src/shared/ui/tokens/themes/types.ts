@@ -116,6 +116,37 @@ export interface RadiusScale {
 }
 
 /**
+ * Fixed component dimensions the design draws — control heights, tile sizes, the checkbox.
+ * Surfaced so no component hard-codes a height; see `primitive/sizes.ts`.
+ */
+export interface SizeScale {
+  readonly size20: number;
+  readonly size36: number;
+  readonly size52: number;
+  readonly size56: number;
+  readonly size60: number;
+  readonly size64: number;
+}
+
+/**
+ * Glyph sizes for icon text. A Material Symbols glyph is text set at the size of its em box,
+ * so this is the font-size scale under the name the icon primitive reads it by — the same
+ * object as `primitive/typography.ts § FontSize`, not a second copy of those numbers.
+ */
+export interface IconSizeScale {
+  readonly size12: number;
+  readonly size14: number;
+  readonly size16: number;
+  readonly size18: number;
+  readonly size20: number;
+  readonly size22: number;
+  readonly size24: number;
+  readonly size26: number;
+  readonly size28: number;
+  readonly size30: number;
+}
+
+/**
  * Named text styles. Each one is a size / line height / weight / tracking pairing that the
  * canvas actually draws; components pick a role and never compose their own.
  */
@@ -163,8 +194,16 @@ export interface Theme {
   readonly colors: ThemeColors;
   readonly spacing: SpacingScale;
   readonly borderRadius: RadiusScale;
+  readonly sizes: SizeScale;
+  readonly iconSizes: IconSizeScale;
   readonly typography: TypographyVariants;
   readonly shadows: ShadowTokens;
+  /**
+   * The family name of the bundled Material Symbols Outlined face, applied once by the icon
+   * primitive. A font family is a design value like any other, so it belongs on the theme
+   * rather than as a string literal inside a component.
+   */
+  readonly iconFontFamily: string;
   /**
    * The cap on the OS text-size multiplier, applied once by the text primitive. Declared
    * here so no component derives a multiplier of its own — see

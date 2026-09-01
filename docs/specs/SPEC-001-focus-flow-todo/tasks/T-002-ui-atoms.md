@@ -2,17 +2,17 @@
 
 ## Meta
 
-| Field         | Value                             |
-| ------------- | --------------------------------- |
-| Type          | feature                           |
-| Size          | M                                 |
-| Risk          | medium                            |
-| Status        | not-started                       |
-| Languages     | TS                                |
-| Scope paths   | `src/shared/ui/atoms/**`          |
-| Blocked by    | T-001                             |
-| Blocks        | T-003, T-008, T-009, T-011, T-012 |
-| Epic sections | §9.3, §16.2                       |
+| Field         | Value                                                                                                         |
+| ------------- | ------------------------------------------------------------------------------------------------------------- |
+| Type          | feature                                                                                                       |
+| Size          | M                                                                                                             |
+| Risk          | medium                                                                                                        |
+| Status        | not-started                                                                                                   |
+| Languages     | TS                                                                                                            |
+| Scope paths   | `src/shared/ui/atoms/**`, plus `src/shared/ui/tokens/primitive/sizes.ts` and the theme group that surfaces it |
+| Blocked by    | T-001                                                                                                         |
+| Blocks        | T-003, T-008, T-009, T-011, T-012                                                                             |
+| Epic sections | §9.3, §16.2                                                                                                   |
 
 ## Goal
 
@@ -50,6 +50,15 @@ four silently do not happen — which is why the lint rule blocks them outside t
 | `AppScrollView` | Themed scroll container with the screen's horizontal margin as an option                                                                                                                            |
 | `AppFlashList`  | Thin wrapper over `@shopify/flash-list` — the project's only list primitive                                                                                                                         |
 | `AppIcon`       | Material Symbols Outlined glyph at a themed size and colour                                                                                                                                         |
+
+### Component dimensions
+
+T-001 deliberately did not create a dimension scale, because it had no call sites. The atoms
+are the first call sites: the checkbox is 20, the task row's minimum height 56, control and
+floating-button height 52, the OTP box 60, icon tiles 64 and 36. Add
+`src/shared/ui/tokens/primitive/sizes.ts` with the values this task actually needs, surface it
+on the theme, and take the values from the canvas rather than inventing a ladder. Later screens
+extend it the same way.
 
 ### Rules that apply to every atom
 

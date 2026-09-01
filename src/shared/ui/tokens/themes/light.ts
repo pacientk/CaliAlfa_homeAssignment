@@ -1,6 +1,7 @@
 import { Palette } from '../primitive/palette';
 import { Radii } from '../primitive/radii';
 import { Shadows } from '../primitive/shadows';
+import { Sizes } from '../primitive/sizes';
 import { Spacing } from '../primitive/spacing';
 import {
   FontFamily,
@@ -68,6 +69,13 @@ export const lightTheme: Theme = {
 
   spacing: Spacing,
   borderRadius: Radii,
+  sizes: Sizes,
+
+  // A Material Symbols glyph is text set at the size of its em box, so the icon primitive
+  // reads its size from the font-size scale rather than from a second ladder of the same
+  // numbers. The name below is what makes that reading explicit at the call site.
+  iconSizes: FontSize,
+  iconFontFamily: FontFamily.icon,
 
   typography: {
     headline: {
