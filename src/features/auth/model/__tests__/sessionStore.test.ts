@@ -1,5 +1,4 @@
 import {
-  signIn,
   signOut,
   startSessionObserver,
   useIsSignedIn,
@@ -120,17 +119,5 @@ describe('the session store', () => {
     });
 
     expect(mockFirebaseSignOut).toHaveBeenCalledTimes(1);
-  });
-
-  it('seeds a session with no number when the placeholder screen signs in', async () => {
-    const signedIn = await renderHook(() => useIsSignedIn());
-    const phone = await renderHook(() => useSessionPhoneNumber());
-
-    await act(() => {
-      signIn();
-    });
-
-    expect(signedIn.result.current).toBe(true);
-    expect(phone.result.current).toBeUndefined();
   });
 });

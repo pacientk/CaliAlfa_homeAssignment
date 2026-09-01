@@ -4,7 +4,7 @@ import type { AuthService } from './AuthService';
 import { firebaseAuthService } from './firebaseAuthService';
 
 /**
- * What the app knows about the current session. Three scalars: the provider owns the
+ * What the app knows about the current session. Two scalars: the provider owns the
  * credential, and mirroring anything else of Firebase's in here would give the app a
  * second source of truth to keep honest.
  */
@@ -18,18 +18,22 @@ interface SessionState {
    * first frame instead of flashing.
    */
   readonly isInitialising: boolean;
-  /** Whether a session exists. The flag the root navigator switches on. */
-  readonly isSignedIn: boolean;
-  /** The signed-in number in E.164, absent when there is no session. */
+  /**
+   * The signed-in number in E.164, absent when there is no session.
+   *
+   * There is deliberately no `isSignedIn` field beside it. `observeSession` collapses the
+   * Firebase user to its phone number, so "there is a number" and "there is a session" are
+   * the same fact, and storing it twice is storing a way for the two to disagree.
+   */
   readonly phoneNumber?: string;
 }
 
 /**
- * Signed out and still asking. Starting from `isSignedIn: false` is the safe default: a
- * consumer that ignores `isInitialising` shows the welcome screen rather than briefly
- * exposing the tab shell to someone who has no session.
+ * Signed out and still asking. Starting with no number is the safe default: a consumer that
+ * ignores `isInitialising` shows the welcome screen rather than briefly exposing the tab
+ * shell to someone who has no session.
  */
-const INITIAL_SESSION: SessionState = { isInitialising: true, isSignedIn: false };
+const INITIAL_SESSION: SessionState = { isInitialising: true };
 
 /**
  * The store singleton is module-private. `docs/architecture/principles.md § D` says
@@ -39,24 +43,22 @@ const INITIAL_SESSION: SessionState = { isInitialising: true, isSignedIn: false 
 const useSessionStore = create<SessionState>()(() => INITIAL_SESSION);
 
 /**
- * The one writer. Everything the provider reports arrives here, and reporting a number is
- * what "signed in" means — `observeSession` collapses the Firebase user to its phone, so
- * an absent number is an absent session.
+ * The one writer. Everything the provider reports arrives here.
  *
- * The three fields are spelled out rather than spread because zustand merges shallowly:
- * an omitted `phoneNumber` would leave the previous user's number on screen after a
- * sign-out instead of clearing it.
+ * Both fields are spelled out rather than spread because zustand merges shallowly: an
+ * omitted `phoneNumber` would leave the previous user's number on screen after a sign-out
+ * instead of clearing it.
  */
 const applySession = (phoneNumber: string | undefined): void => {
-  useSessionStore.setState({
-    isInitialising: false,
-    isSignedIn: phoneNumber !== undefined,
-    phoneNumber,
-  });
+  useSessionStore.setState({ isInitialising: false, phoneNumber });
 };
 
-/** The narrowest slice there is — the flag the root navigator switches on. */
-export const useIsSignedIn = (): boolean => useSessionStore(state => state.isSignedIn);
+/**
+ * The flag the root navigator switches on. Derived in the selector rather than stored,
+ * because a session is exactly "the provider named a number".
+ */
+export const useIsSignedIn = (): boolean =>
+  useSessionStore(state => state.phoneNumber !== undefined);
 
 /** True while the provider has not yet reported. A consumer renders nothing until it clears. */
 export const useIsSessionInitialising = (): boolean =>
@@ -104,17 +106,4 @@ export const signOut = (): void => {
     // log instead of surfacing later as a session that returns after a relaunch.
     console.warn('Firebase sign-out failed after the local session was cleared', cause);
   });
-};
-
-/**
- * TEMPORARY — seeds a session with no provider behind it.
- *
- * The placeholder verification screen from T-003 has no code field yet, so it needs some
- * way to say "assume a session exists"; this is that, and T-008 deletes it when the real
- * screen calls `confirmCode` instead. It sets `isSignedIn` without a number because it
- * genuinely has none, and Firebase holds no session, so a relaunch lands on the welcome
- * screen — a seeded session is visibly not a real one.
- */
-export const signIn = (): void => {
-  useSessionStore.setState({ isInitialising: false, isSignedIn: true, phoneNumber: undefined });
 };

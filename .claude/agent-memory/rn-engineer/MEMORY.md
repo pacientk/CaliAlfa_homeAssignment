@@ -10,3 +10,7 @@
   iOS without an APNs key; `appVerificationDisabledForTesting` is the switch.
 - `react-native-firebase-under-jest` — importing the SDK is fatal under Jest; fix it once
   with a root `__mocks__` entry and add `__mocks__` to the tsconfig `include`.
+- `transparent-overlay-is-untappable` — an `opacity: 0` view is invisible to UIKit hit-testing;
+  an overlaid input never focuses on the device and no unit test can see it.
+- `rntl-v14-element-type-and-async-events` — `fireEvent` must be awaited, and v14's queries
+  return its own renderer's `TestInstance`, not `ReactTestInstance`.

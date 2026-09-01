@@ -1,5 +1,7 @@
 import { AppProviders } from '@app/AppProviders';
-import { signIn, signOut } from '@features/auth';
+import { AuthServiceContext, signOut, startSessionObserver } from '@features/auth';
+import type { FakeAuthService } from '@features/auth/testing/authServiceDouble';
+import { createFakeAuthService } from '@features/auth/testing/authServiceDouble';
 import { strings } from '@lib/strings';
 import { act, render, screen, userEvent } from '@testing-library/react-native';
 import type { ReactNode } from 'react';
@@ -25,11 +27,23 @@ jest.mock('react-native-safe-area-context', () => {
   };
 });
 
-const renderApp = async (): Promise<void> => {
+const TEST_PHONE = '+972528287009';
+const TEST_CODE = '123456';
+
+/**
+ * The session is driven the way the app drives it: through the provider's listener. There is
+ * no back door any more — T-007's temporary `signIn` seeded a session with nothing behind it,
+ * and T-008 deleted it once the verification screen started calling `confirmCode`.
+ */
+const mountApp = async (service: FakeAuthService): Promise<void> => {
+  startSessionObserver(service);
+
   await render(
-    <AppProviders>
-      <RootNavigator />
-    </AppProviders>,
+    <AuthServiceContext.Provider value={service}>
+      <AppProviders>
+        <RootNavigator />
+      </AppProviders>
+    </AuthServiceContext.Provider>,
   );
 };
 
@@ -40,35 +54,74 @@ describe('RootNavigator', () => {
     });
   });
 
-  it('renders the auth stack and no tab shell when there is no session', async () => {
-    await renderApp();
+  it('renders neither stack while the provider has not yet reported', async () => {
+    const service = createFakeAuthService();
 
-    expect(screen.getByText(strings.welcome.title)).toBeTruthy();
+    await mountApp(service);
+
+    expect(screen.queryByText(strings.welcome.badge)).toBeNull();
+    expect(screen.queryByText(strings.taskList.title)).toBeNull();
+  });
+
+  it('renders the auth stack and no tab shell when the provider reports no session', async () => {
+    const service = createFakeAuthService();
+    await mountApp(service);
+
+    await act(() => {
+      service.emitSession(undefined);
+    });
+
+    expect(screen.getByText(strings.welcome.badge)).toBeTruthy();
     expect(screen.queryByText(strings.tabs.calendar)).toBeNull();
     expect(screen.queryByText(strings.taskList.title)).toBeNull();
   });
 
-  it('renders the tab shell and no auth screen once a session exists', async () => {
-    await act(() => {
-      signIn();
-    });
+  it('renders the tab shell and no auth screen once the provider reports a number', async () => {
+    const service = createFakeAuthService();
+    await mountApp(service);
 
-    await renderApp();
+    await act(() => {
+      service.emitSession(TEST_PHONE);
+    });
 
     expect(screen.getByText(strings.taskList.title)).toBeTruthy();
     expect(screen.getByText(strings.tabs.calendar)).toBeTruthy();
     expect(screen.getByText(strings.tabs.settings)).toBeTruthy();
-    expect(screen.queryByText(strings.welcome.title)).toBeNull();
+    expect(screen.queryByText(strings.welcome.badge)).toBeNull();
   });
 
-  it('swaps the auth stack for the tab shell when the session is created while mounted', async () => {
-    await renderApp();
+  it('walks welcome to phone to code, and swaps to the tab shell when the session arrives', async () => {
+    const service = createFakeAuthService();
+    await mountApp(service);
+    await act(() => {
+      service.emitSession(undefined);
+    });
 
     await userEvent.press(screen.getByRole('button', { name: strings.welcome.continue }));
+    await userEvent.type(
+      screen.getByLabelText(strings.phoneNumber.fieldAccessibilityLabel),
+      TEST_PHONE,
+    );
     await userEvent.press(screen.getByRole('button', { name: strings.phoneNumber.submit }));
+
+    expect(screen.getByText(strings.verificationCode.sentTo(TEST_PHONE))).toBeTruthy();
+    expect(service.requestedPhones).toEqual([TEST_PHONE]);
+
+    await userEvent.type(
+      screen.getByLabelText(strings.verificationCode.fieldAccessibilityLabel),
+      TEST_CODE,
+    );
     await userEvent.press(screen.getByRole('button', { name: strings.verificationCode.submit }));
 
+    expect(service.submittedCodes).toEqual([TEST_CODE]);
+
+    // Firebase reports the new session through the same listener the app has been watching
+    // all along; nothing in the verification screen navigates.
+    await act(() => {
+      service.emitSession(TEST_PHONE);
+    });
+
     expect(screen.getByText(strings.taskList.title)).toBeTruthy();
-    expect(screen.queryByText(strings.verificationCode.subtitle)).toBeNull();
+    expect(screen.queryByText(strings.verificationCode.title)).toBeNull();
   });
 });

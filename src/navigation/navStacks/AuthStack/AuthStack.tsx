@@ -26,18 +26,29 @@ const PhoneNumberRoute = ({
     navigation.navigate(ROUTES.VERIFICATION_CODE);
   };
 
-  return <PhoneNumberScreen onSubmit={openVerificationCode} />;
+  return <PhoneNumberScreen onBack={navigation.goBack} onCodeSent={openVerificationCode} />;
 };
 
+const VerificationCodeRoute = ({
+  navigation,
+}: IAuthStackScreenProps<typeof ROUTES.VERIFICATION_CODE>): JSX.Element => (
+  <VerificationCodeScreen onBack={navigation.goBack} />
+);
+
 /**
- * Signed out. Accepting the code does not push a route from here — it sets the session, and
- * `RootNavigator` swaps this whole stack for the tab shell, which is why the verification
- * screen needs no wrapper.
+ * Signed out. Accepting the code does not push a route from here — it creates the session, and
+ * `RootNavigator` swaps this whole stack for the tab shell, which is why the verification route
+ * only has to wire a way back.
+ *
+ * The three route components are module-level rather than inline closures: a component declared
+ * inside another remounts its entire subtree on every render of the parent
+ * (`docs/architecture/principles.md § Component Decomposition`), which on this stack would drop
+ * the digits the user has typed.
  */
 export const AuthStack = (): JSX.Element => (
   <Stack.Navigator screenOptions={HIDDEN_HEADER}>
     <Stack.Screen name={ROUTES.WELCOME} component={WelcomeRoute} />
     <Stack.Screen name={ROUTES.PHONE_NUMBER} component={PhoneNumberRoute} />
-    <Stack.Screen name={ROUTES.VERIFICATION_CODE} component={VerificationCodeScreen} />
+    <Stack.Screen name={ROUTES.VERIFICATION_CODE} component={VerificationCodeRoute} />
   </Stack.Navigator>
 );
