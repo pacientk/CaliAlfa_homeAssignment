@@ -1,3 +1,26 @@
 {
-  "extends": "@react-native/typescript-config"
+  "extends": "@react-native/typescript-config",
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "baseUrl": ".",
+    "paths": {
+      "@app/*": ["src/app/*"],
+      "@navigation/*": ["src/navigation/*"],
+      "@screens/*": ["src/screens/*"],
+      "@widgets/*": ["src/widgets/*"],
+      "@features/*": ["src/features/*"],
+      "@entities/*": ["src/entities/*"],
+      "@shared/*": ["src/shared/*"],
+      "@ui/*": ["src/shared/ui/*"],
+      "@lib/*": ["src/shared/lib/*"],
+      "@api/*": ["src/shared/api/*"],
+      "@services/*": ["src/shared/services/*"],
+      "@config/*": ["src/shared/config/*"],
+      "@store/*": ["src/shared/store/*"]
+    }
+  },
+  "include": ["src", "index.js", "*.ts", "*.tsx"],
+  "exclude": ["node_modules", "ios", "android"]
 }

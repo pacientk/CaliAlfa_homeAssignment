@@ -46,9 +46,16 @@ export default tseslint.config(
       'vendor/**',
       'coverage/**',
       '**/*.config.js',
+      '**/*.config.mjs',
+      '.prettierrc.js',
       'metro.config.js',
       'jest.config.js',
       'babel.config.js',
+      // React Native template scaffolding. Both are deleted in T-003, which
+      // replaces the root component with the real app shell; until then they
+      // would report violations of rules that only apply to our own code.
+      'App.tsx',
+      '__tests__/**',
     ],
   },
 

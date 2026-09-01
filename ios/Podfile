@@ -8,6 +8,14 @@ require Pod::Executable.execute_command('node', ['-p',
 platform :ios, min_ios_version_supported
 prepare_react_native_project!
 
+# React Native Firebase ships Swift pods whose umbrella header pulls in a
+# Swift-generated header that only exists when the pod is built as a framework.
+# Linking Firebase as a static framework is the documented fix; the template's own
+# USE_FRAMEWORKS switch is the supported way to ask for it, so default it here
+# rather than requiring an env var on every `pod install`.
+$RNFirebaseAsStaticFramework = true
+ENV['USE_FRAMEWORKS'] ||= 'static'
+
 linkage = ENV['USE_FRAMEWORKS']
 if linkage != nil
   Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
