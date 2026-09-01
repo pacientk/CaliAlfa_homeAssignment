@@ -82,3 +82,51 @@ queue change and therefore outside the binding layer's remit.
 way, and the next app start restores the record. Closing it means changing the one component
 the spec is judged on, after its 151 tests and 23 mutation checks were signed off.
 **If time allows:** worth doing after Wave 5, with its own mutation check.
+
+## FW-05 — An intermittent LogBox warning toast on launch
+
+Some cold starts of the Debug build raise React Native's yellow LogBox toast, "Open debugger
+to view warnings." It is not reproducible on demand: it appeared on two launches during the
+T-013 pass and not on four others with identical state. The warning text could not be read —
+RN 0.80 moved JavaScript logs out of Metro's stdout into React Native DevTools, and the toast
+dismissed rather than expanded on every tap the automation could land — so this entry records
+a symptom, not a diagnosis.
+
+**Source:** T-013 hand-off, 2026-09-02.
+**Why deferred:** LogBox does not exist in a Release build, so nothing a user would ever run
+is affected, and chasing an intermittent warning through DevTools costs more than the
+delivery pass had left. It is recorded rather than dropped because an unread warning is a
+warning nobody has ruled out.
+**How to pick it up:** launch with React Native DevTools attached (`j` in an interactive
+Metro), relaunch until the toast appears, and read the entry. If it is a `Require cycle` or a
+key warning it is worth fixing; if it is a third-party deprecation notice it is worth an
+eslint-style suppression note here instead.
+
+## FW-06 — An automated offline end-to-end test, and the harness it needs
+
+The offline claim is the centre of this submission and it is verified entirely by hand
+(epic §18.4). Two things stand in the way of automating it, and both are worth writing down
+before someone tries again.
+
+First, there is no offline switch for an iOS **Simulator** — only for the host. Toggling the
+host's Wi-Fi does make the app fail, but it does so in a way that is not a fair simulation:
+the simulator process keeps an `NWPathKey=unsatisfied` route after the host interface comes
+back, so every request keeps failing with `NSURLErrorNotConnectedToInternet (-1009)` until
+the process is restarted. During T-013 that artefact looked exactly like an application
+defect — the banner stayed on "Offline" and the queue stayed unsent for minutes — until the
+system log showed the app dutifully retrying every five seconds and the OS refusing each one.
+Blackholing DNS on the host instead (`networksetup -setdnsservers Wi-Fi 127.0.0.1`) leaves
+the route satisfied, breaks only name resolution, and lets the running process recover the
+moment DNS is restored. That is the mechanism a future harness should use, and it needs no
+`sudo`.
+
+Second, the interesting assertions are server-side: that a create and the edit queued behind
+it both arrive, and that the edit is addressed to the id the create was assigned. A Maestro
+flow can drive the taps but cannot make that assertion; it needs a wrapper that drives
+Maestro, flips DNS, and then reads the API back with `curl`.
+
+**Source:** T-013 hand-off, 2026-09-02.
+**Why deferred:** the manual cycle passes and is documented; building the harness is a
+half-day of work on the test side that buys nothing for this submission's deadline.
+**Cost of leaving it:** the one claim a reviewer is most likely to probe is the one with no
+regression guard behind it.

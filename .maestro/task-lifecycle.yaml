@@ -1,0 +1,75 @@
+# The one end-to-end flow. Declared a bonus in SPEC-001 §18.1, so it covers the golden path
+# rather than trying to be a suite: sign in if the session is not already restored, reject a
+# duplicate title, accept a good one, and delete the task again so the flow leaves the shared
+# API exactly as it found it.
+#
+# Run with the simulator booted and Metro running:
+#   maestro test .maestro/task-lifecycle.yaml
+#
+# It deliberately does not cover the offline cycle. Maestro can drive the taps but cannot
+# assert what reached the server, and that assertion is the whole point of the offline claim —
+# see FW-06 in docs/future-work.md for the harness that would be needed.
+
+appId: org.reactjs.native.example.CaliAlfa
+name: Task lifecycle — sign in, reject a duplicate title, create, delete
+---
+- launchApp
+
+# Sign-in runs only on a cold install. A restored session skips straight to the list, which is
+# FR-2, so the flow must not assume either state.
+- runFlow:
+    when:
+      visible:
+        id: "welcome.next"
+    commands:
+      - tapOn:
+          id: "welcome.next"
+      - tapOn:
+          id: "phoneNumber.field"
+      - inputText: "+972528287009"
+      - tapOn:
+          id: "phoneNumber.next"
+      - assertVisible:
+          id: "otp.field"
+      - tapOn:
+          id: "otp.field"
+      - inputText: "123456"
+      - tapOn:
+          id: "otp.next"
+
+- assertVisible:
+    id: "taskList.list"
+
+# FR-14: a duplicate title is rejected inline and the submit stays disabled.
+- tapOn:
+    id: "taskList.newTask"
+- assertVisible:
+    id: "taskForm.title"
+- tapOn:
+    id: "taskForm.title"
+- inputText: "Renew passport"
+- assertVisible: ".*already exists.*"
+
+# A unique title clears it, and the task lands in the list.
+- eraseText: 14
+- inputText: "Post the Maestro flow"
+- tapOn:
+    id: "taskForm.submit"
+- assertVisible:
+    id: "taskList.list"
+- assertVisible: "Post the Maestro flow"
+
+# FR-9, FR-10: the row menu, the confirmation modal, and the row gone afterwards.
+- tapOn:
+    id: "taskList\\.row\\..*\\.actions"
+    index: 0
+- tapOn: "Delete"
+# The modal's container carries `taskList.deleteDialog`, but a React Native Modal is presented
+# in its own UIWindow and only accessible elements cross into the XCUITest hierarchy — the
+# container is a plain view, so Maestro cannot see it. Its two buttons are pressables and do
+# come through, so the confirm button is what the flow asserts on.
+- assertVisible:
+    id: "taskList.deleteDialog.confirm"
+- tapOn:
+    id: "taskList.deleteDialog.confirm"
+- assertNotVisible: "Post the Maestro flow"
