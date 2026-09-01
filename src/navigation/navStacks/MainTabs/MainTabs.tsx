@@ -39,10 +39,25 @@ const TaskListRoute = ({
 const renderTabBar = (props: ITabBarProps): JSX.Element => <TabBar {...props} />;
 
 /** The authenticated shell. Three tabs, drawn by the design's own bar. */
+/**
+ * The calendar tab's only action is the way back to the list. The screen is handed the
+ * intent; the route name stays here, because navigation sits above screens in the layer
+ * order and a screen that imported ROUTES would fail lint.
+ */
+const CalendarRoute = ({
+  navigation,
+}: IMainTabScreenProps<typeof ROUTES.CALENDAR>): JSX.Element => {
+  const goToTasks = (): void => {
+    navigation.navigate(ROUTES.TASK_LIST);
+  };
+
+  return <CalendarScreen onBackToTasks={goToTasks} />;
+};
+
 export const MainTabs = (): JSX.Element => (
   <Tabs.Navigator screenOptions={HIDDEN_HEADER} tabBar={renderTabBar}>
     <Tabs.Screen name={ROUTES.TASK_LIST} component={TaskListRoute} />
-    <Tabs.Screen name={ROUTES.CALENDAR} component={CalendarScreen} />
+    <Tabs.Screen name={ROUTES.CALENDAR} component={CalendarRoute} />
     <Tabs.Screen name={ROUTES.SETTINGS} component={SettingsScreen} />
   </Tabs.Navigator>
 );
