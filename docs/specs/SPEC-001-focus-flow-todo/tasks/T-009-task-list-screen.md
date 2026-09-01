@@ -108,3 +108,21 @@ visual match is manual against the artboards.
 - Epic §9.1, §8
 - Artboards B1–B5 and the component sheet in `Tech Assignment/design/`
 - `TaskRow.dc.html` carries the exact per-state styling
+
+## Additional scenarios found during implementation
+
+Appended per the verification checklist §0. Each one is covered by a test.
+
+- **S-6** — the momentum counts stay on the whole cache while a search narrows the view.
+  Found by mutation testing: counting `visibleTasks` instead of `tasks` passed the suite as
+  first written. FR-16 counts the day's work, not the filtered page.
+- **S-7** — at most one row menu is open at a time, and pressing the same three-dot button
+  again closes it. The design draws only the open state, so the closing rule was unstated.
+- **S-8** — choosing Edit closes the menu before navigating, so returning from the detail
+  screen does not land on an open menu.
+- **S-9** — the floating "New task" button is hidden on the no-tasks state, whose own call to
+  action replaces it. Artboard B4 draws no FAB; B5 does.
+- **S-10** — the decorative focus-mode block and the pro-tip card appear only while the list
+  has rows. Neither is drawn on B4 or B5.
+- **S-11** — the no-results copy names the **settled** query rather than the live field value,
+  so the sentence and the list it explains cannot disagree mid-keystroke.

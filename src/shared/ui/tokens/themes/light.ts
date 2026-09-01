@@ -40,6 +40,7 @@ export const lightTheme: Theme = {
       containerHigh: Palette.neutral300,
       containerHighest: Palette.neutral400,
       dim: Palette.neutral500,
+      scrim: Palette.scrim,
     },
     text: {
       primary: Palette.neutral900,

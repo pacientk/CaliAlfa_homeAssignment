@@ -45,7 +45,7 @@ describe('RootNavigator', () => {
 
     expect(screen.getByText(strings.welcome.title)).toBeTruthy();
     expect(screen.queryByText(strings.tabs.calendar)).toBeNull();
-    expect(screen.queryByText(strings.taskList.subtitle)).toBeNull();
+    expect(screen.queryByText(strings.taskList.title)).toBeNull();
   });
 
   it('renders the tab shell and no auth screen once a session exists', async () => {
@@ -55,7 +55,7 @@ describe('RootNavigator', () => {
 
     await renderApp();
 
-    expect(screen.getByText(strings.taskList.subtitle)).toBeTruthy();
+    expect(screen.getByText(strings.taskList.title)).toBeTruthy();
     expect(screen.getByText(strings.tabs.calendar)).toBeTruthy();
     expect(screen.getByText(strings.tabs.settings)).toBeTruthy();
     expect(screen.queryByText(strings.welcome.title)).toBeNull();
@@ -68,7 +68,7 @@ describe('RootNavigator', () => {
     await userEvent.press(screen.getByRole('button', { name: strings.phoneNumber.submit }));
     await userEvent.press(screen.getByRole('button', { name: strings.verificationCode.submit }));
 
-    expect(screen.getByText(strings.taskList.subtitle)).toBeTruthy();
+    expect(screen.getByText(strings.taskList.title)).toBeTruthy();
     expect(screen.queryByText(strings.verificationCode.subtitle)).toBeNull();
   });
 });

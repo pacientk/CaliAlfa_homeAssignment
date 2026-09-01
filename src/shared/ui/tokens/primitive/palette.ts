@@ -4,7 +4,7 @@
  *
  * Every value is taken verbatim from the canvas sources in
  * `Tech Assignment/design/Task app multi-flow design/*.dc.html`. The canvas uses exactly
- * these 22 colours and no others, so the list is closed: a screen that needs a colour that
+ * these 23 colours and no others, so the list is closed: a screen that needs a colour that
  * is not here is a design question, not an implementation one.
  */
 export const Palette = {
@@ -61,4 +61,13 @@ export const Palette = {
    * which the design specifies as `rgba(0, 0, 0, 0.05)`. See `shadows.ts`.
    */
   black: '#000000',
+
+  /**
+   * rgba(28, 26, 35, 0.4) — the modal scrim, drawn on artboard B3 and annotated there as
+   * "Scrim #1c1a23 at 40%". It is authored with its alpha baked in rather than as
+   * `neutral900` plus an opacity, because a translucent *layer* would fade the dialog
+   * standing on it; only a translucent *fill* dims the screen behind and leaves the card
+   * opaque.
+   */
+  scrim: 'rgba(28, 26, 35, 0.4)',
 } as const;

@@ -16,6 +16,8 @@ export interface IAppFlashListProps<TItem> {
    */
   readonly keyExtractor: (item: TItem, index: number) => string;
   readonly ListHeaderComponent?: ReactElement | null;
+  /** Scrolls with the rows, below the last of them — the task list's pro-tip card. */
+  readonly ListFooterComponent?: ReactElement | null;
   readonly ListEmptyComponent?: ReactElement | null;
   readonly contentContainerStyle?: StyleProp<ViewStyle>;
   /**

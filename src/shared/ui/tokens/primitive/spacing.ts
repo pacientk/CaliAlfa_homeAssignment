@@ -37,4 +37,6 @@ export const Spacing = {
   space40: 40,
   /** 56 — the top inset of a centred empty state. */
   space56: 56,
+  /** 120 — the bottom inset that lifts artboard B4's empty block out of the lower third. */
+  space120: 120,
 } as const;

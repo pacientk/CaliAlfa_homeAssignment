@@ -37,6 +37,8 @@ export interface SurfaceColors {
   readonly containerHighest: string;
   /** A dimmed edge on a disabled control. */
   readonly dim: string;
+  /** The translucent wash behind a modal. */
+  readonly scrim: string;
 }
 
 export interface TextColors {
@@ -102,6 +104,7 @@ export interface SpacingScale {
   readonly space24: number;
   readonly space40: number;
   readonly space56: number;
+  readonly space120: number;
 }
 
 export interface RadiusScale {
@@ -120,9 +123,13 @@ export interface RadiusScale {
  * Surfaced so no component hard-codes a height; see `primitive/sizes.ts`.
  */
 export interface SizeScale {
+  readonly size8: number;
   readonly size20: number;
+  readonly size24: number;
+  readonly size28: number;
   readonly size32: number;
   readonly size36: number;
+  readonly size48: number;
   readonly size52: number;
   readonly size56: number;
   readonly size60: number;

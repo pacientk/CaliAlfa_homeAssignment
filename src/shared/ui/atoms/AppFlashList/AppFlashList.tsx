@@ -20,6 +20,7 @@ export const AppFlashList = <TItem,>({
   renderItem,
   keyExtractor,
   ListHeaderComponent,
+  ListFooterComponent,
   ListEmptyComponent,
   contentContainerStyle,
   extraData,
@@ -30,6 +31,7 @@ export const AppFlashList = <TItem,>({
     renderItem={renderItem}
     keyExtractor={keyExtractor}
     ListHeaderComponent={ListHeaderComponent}
+    ListFooterComponent={ListFooterComponent}
     ListEmptyComponent={ListEmptyComponent}
     contentContainerStyle={contentContainerStyle}
     extraData={extraData}

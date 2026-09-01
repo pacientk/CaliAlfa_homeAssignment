@@ -3,7 +3,7 @@ import { FontFamily, FontSize } from '../primitive/typography';
 import { lightTheme } from '../themes/light';
 
 /** Every rung is a width or a height the canvas sources actually draw. */
-const CANVAS_DIMENSIONS = [20, 32, 36, 52, 56, 60, 64];
+const CANVAS_DIMENSIONS = [8, 20, 24, 28, 32, 36, 48, 52, 56, 60, 64];
 
 describe('the size scale', () => {
   it('surfaces the primitive scale on the theme without re-declaring it', () => {
