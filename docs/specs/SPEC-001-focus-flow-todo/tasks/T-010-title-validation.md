@@ -7,7 +7,7 @@
 | Type          | feature                    |
 | Size          | S                          |
 | Risk          | medium                     |
-| Status        | not-started                |
+| Status        | completed                  |
 | Languages     | TS                         |
 | Scope paths   | `src/entities/task/lib/**` |
 | Blocked by    | T-004                      |
@@ -94,6 +94,24 @@ case and its accepting case, per VR-05.
 - **S-5** — evaluation order: `"   "` is `empty`, not `padded` — covers AC-1
 
 **Manual verification** — none; fully automated.
+
+**Additional scenarios found during implementation**
+
+- **S-6** — `" Buy milk "` against an existing `"Buy milk"` rejects as `padded`, not
+  `duplicate`. The order contract covers the padded/duplicate boundary as well as the
+  empty/padded one — covers AC-2.
+- **S-7** — a stored title carrying its own padding (`"  Feed the cat  "`) still matches a
+  clean candidate, because the comparison trims both sides — covers AC-3.
+- **S-8** — the edited task changing only the case of its own title (`"Buy milk"` →
+  `"buy MILK"`) is accepted — covers AC-5.
+- **S-9** — the edited task keeping a title the seed data holds twice (`"Gloves"`) is
+  accepted. The exclusion is a short-circuit on the edited task's own title rather than a
+  removal of one entry from the list, so a pre-existing server-side duplicate cannot lock
+  a user out of editing — covers AC-5.
+- **S-10** — a whitespace-only title while editing is still `empty`, and a padded form of
+  the edited task's own title is still `padded`. The edit exclusion applies to the
+  duplicate rule only — covers AC-1, AC-2.
+- **S-11** — `validateTitle` does not mutate its input: the caller keeps the raw value.
 
 ## References
 
