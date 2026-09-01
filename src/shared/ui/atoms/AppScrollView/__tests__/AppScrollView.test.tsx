@@ -13,6 +13,7 @@ const renderScrollView = (props: Partial<IAppScrollViewProps> = {}): ReactTestIn
     renderWithTheme(
       <AppScrollView
         hasScreenPadding={props.hasScreenPadding}
+        shouldAvoidKeyboard={props.shouldAvoidKeyboard}
         contentContainerStyle={props.contentContainerStyle}
       >
         <AppText>Fix Elle Driver</AppText>
@@ -60,5 +61,20 @@ describe('AppScrollView content', () => {
     );
 
     expect(JSON.stringify(renderer.toJSON())).toContain('Fix Elle Driver');
+  });
+});
+
+describe('AppScrollView keyboard avoidance', () => {
+  it('lets the system inset the content and scroll the focused field clear when asked', () => {
+    expect(
+      readProp<boolean>(
+        renderScrollView({ shouldAvoidKeyboard: true }),
+        'automaticallyAdjustKeyboardInsets',
+      ),
+    ).toBe(true);
+  });
+
+  it('leaves the scroll offset alone by default', () => {
+    expect(readProp<boolean>(renderScrollView(), 'automaticallyAdjustKeyboardInsets')).toBe(false);
   });
 });

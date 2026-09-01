@@ -15,6 +15,13 @@ export interface IAppTextInputProps {
    */
   readonly errorMessage?: string;
   readonly isDisabled?: boolean;
+  /**
+   * Grows the field to the 96 pt box the task form draws for a description and lets the
+   * text wrap. It is a mode of this field rather than a second component: every other
+   * property the design gives an input — the four states, the ring widths, the message —
+   * is identical, and a `MultilineTextInput` would have to restate all of them.
+   */
+  readonly isMultiline?: boolean;
   readonly keyboardType?: KeyboardTypeOptions;
   readonly maxLength?: number;
   /** The wrapper around label, field, and message — for layout, never for the field's own look. */

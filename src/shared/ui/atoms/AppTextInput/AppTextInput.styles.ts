@@ -6,6 +6,7 @@ export interface AppTextInputStyles {
   readonly container: ViewStyle;
   readonly label: TextStyle;
   readonly field: TextStyle;
+  readonly fieldMultiline: TextStyle;
   readonly fieldResting: TextStyle;
   readonly fieldFocused: TextStyle;
   readonly fieldError: TextStyle;
@@ -49,6 +50,12 @@ export const makeAppTextInputStyles = (theme: Theme): AppTextInputStyles =>
       borderRadius: theme.borderRadius.radius12,
       paddingHorizontal: theme.spacing.space16,
       color: theme.colors.text.primary,
+    },
+    // Artboards B6 and B8, "DESCRIPTION": a 96 pt box with 14 pt of vertical padding. A
+    // minimum again, not a fixed height — the text inside it is what the field is for.
+    fieldMultiline: {
+      minHeight: theme.sizes.size96,
+      paddingVertical: theme.spacing.space14,
     },
     fieldResting: {
       backgroundColor: theme.colors.surface.lowest,

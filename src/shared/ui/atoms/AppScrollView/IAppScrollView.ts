@@ -9,6 +9,13 @@ export interface IAppScrollViewProps {
    * this design and would otherwise have to undo the padding.
    */
   readonly hasScreenPadding?: boolean;
+  /**
+   * Insets the content by however much the keyboard overlaps it, and scrolls the focused
+   * field back into view. Off by default: it only pays for itself on a screen whose fields
+   * reach below the keyboard's top edge, and a screen that has no fields should not have its
+   * scroll offset moved by one appearing elsewhere.
+   */
+  readonly shouldAvoidKeyboard?: boolean;
   /** The scroll viewport. Use for `flex`, never for the content's own padding. */
   readonly style?: StyleProp<ViewStyle>;
   /** The scrolling content. Composed after the screen padding, so it can add to it. */

@@ -18,6 +18,7 @@ const renderInput = (props: Partial<IAppTextInputProps> = {}): ReactTestRenderer
       placeholder={props.placeholder}
       errorMessage={props.errorMessage}
       isDisabled={props.isDisabled}
+      isMultiline={props.isMultiline}
     />,
   );
 
@@ -185,5 +186,37 @@ describe('AppTextInput editing', () => {
     });
 
     expect(onChangeText).toHaveBeenCalledWith('Fix Bill');
+  });
+});
+
+describe('AppTextInput multiline mode (artboards B6 and B8)', () => {
+  it('grows to the 96 pt description box and pads it the way the canvas does', () => {
+    const style = styleOf(fieldOf(renderInput({ isMultiline: true })));
+
+    expect(style.minHeight).toBe(lightTheme.sizes.size96);
+    expect(style.paddingVertical).toBe(lightTheme.spacing.space14);
+    expect(style.height).toBeUndefined();
+  });
+
+  it('lets the text wrap', () => {
+    expect(readProp<boolean>(fieldOf(renderInput({ isMultiline: true })), 'multiline')).toBe(true);
+  });
+
+  it('stays a single-line 52 pt field by default', () => {
+    const field = fieldOf(renderInput());
+    const style = styleOf(field);
+
+    expect(readProp<boolean>(field, 'multiline')).toBe(false);
+    expect(style.minHeight).toBe(lightTheme.sizes.size52);
+    expect(style.paddingVertical).toBeUndefined();
+  });
+
+  it('keeps every other state it has — a multiline field still shows its error ring', () => {
+    const style = styleOf(
+      fieldOf(renderInput({ isMultiline: true, errorMessage: 'Give the task a title.' })),
+    );
+
+    expect(style.borderColor).toBe(lightTheme.colors.border.error);
+    expect(style.minHeight).toBe(lightTheme.sizes.size96);
   });
 });

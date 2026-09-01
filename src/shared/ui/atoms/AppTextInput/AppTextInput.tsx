@@ -48,6 +48,7 @@ export const AppTextInput = ({
   placeholder,
   errorMessage,
   isDisabled = false,
+  isMultiline = false,
   keyboardType,
   maxLength,
   style,
@@ -73,6 +74,7 @@ export const AppTextInput = ({
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
         editable={!isDisabled}
+        multiline={isMultiline}
         placeholder={placeholder}
         placeholderTextColor={theme.colors.text.tertiary}
         selectionColor={theme.colors.primary.base}
@@ -82,7 +84,7 @@ export const AppTextInput = ({
         accessibilityLabel={accessibilityLabel}
         accessibilityHint={errorMessage}
         accessibilityState={{ disabled: isDisabled }}
-        style={[styles.field, fieldState]}
+        style={[styles.field, isMultiline ? styles.fieldMultiline : null, fieldState]}
         testID={testID}
       />
       {hasError ? (

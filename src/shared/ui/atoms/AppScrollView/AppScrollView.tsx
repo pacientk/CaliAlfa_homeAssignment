@@ -16,10 +16,16 @@ import type { IAppScrollViewProps } from './IAppScrollView';
  * `keyboardShouldPersistTaps="handled"` is a fixed default rather than a prop. Without it a
  * tap on a button while the keyboard is open is swallowed by the dismiss gesture, so the user
  * has to press twice — a defect every form in this app would otherwise be free to reintroduce.
+ *
+ * Keyboard avoidance, by contrast, *is* a prop. It is UIKit's own content-inset adjustment
+ * rather than a measured `KeyboardAvoidingView`: the system already knows how far the keyboard
+ * overlaps this scroll view and already scrolls the first responder clear of it, and a
+ * JavaScript reimplementation of that is a height listener that lags the animation.
  */
 export const AppScrollView = ({
   children,
   hasScreenPadding = false,
+  shouldAvoidKeyboard = false,
   style,
   contentContainerStyle,
   testID,
@@ -34,6 +40,7 @@ export const AppScrollView = ({
         contentContainerStyle,
       ]}
       keyboardShouldPersistTaps="handled"
+      automaticallyAdjustKeyboardInsets={shouldAvoidKeyboard}
       testID={testID}
     >
       {children}

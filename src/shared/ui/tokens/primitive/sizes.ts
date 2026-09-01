@@ -27,6 +27,8 @@ export const Sizes = {
   size32: 32,
   /** 36 — the small icon tile on a welcome benefit row, and the focus-mode block. */
   size36: 36,
+  /** 44 — the destructive text action that closes the task detail screen (B8). */
+  size44: 44,
   /** 48 — the search field, the confirmation-modal buttons, and an empty state's button. */
   size48: 48,
   /** 52 — the control height: text field, primary button, floating action button, nav bar. */
@@ -37,4 +39,6 @@ export const Sizes = {
   size60: 60,
   /** 64 — the large icon tile at the centre of an empty state. */
   size64: 64,
+  /** 96 — the multi-line description field on the task form (B6, B8). */
+  size96: 96,
 } as const;

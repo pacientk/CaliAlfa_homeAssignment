@@ -1,0 +1,1 @@
+export { FormTipCard } from './FormTipCard';

@@ -129,11 +129,13 @@ export interface SizeScale {
   readonly size28: number;
   readonly size32: number;
   readonly size36: number;
+  readonly size44: number;
   readonly size48: number;
   readonly size52: number;
   readonly size56: number;
   readonly size60: number;
   readonly size64: number;
+  readonly size96: number;
 }
 
 /**

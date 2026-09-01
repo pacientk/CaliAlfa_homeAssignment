@@ -95,10 +95,20 @@ Nothing is trimmed on the user's behalf.
 - **S-4** — suggestions are the distinct categories, and a new one joins them — covers AC-4
 - **S-5** — clearing an expiry stores no `expiresAt` — covers AC-5
 
+**Additional scenarios found during implementation**
+
+- **S-6** — the navigation bar's centred title spans the whole bar, so it must be drawn
+  _before_ the back arrow or it swallows every tap on it. Found on the simulator; a press
+  test cannot catch it, because the test renderer dispatches to the handler without
+  hit-testing, so the assertion is on sibling order.
+- **S-7** — on the edit screen the completion card pushes the category free-text field below
+  the keyboard's top edge. `AppScrollView` gained an opt-in `shouldAvoidKeyboard`, which is
+  UIKit's own content-inset adjustment, and the form sets it.
+
 **Manual verification**
 
-- [ ] B6, B7, B8 compared with the artboards
-- [ ] The keyboard does not cover the field being edited on the simulator
+- [x] B6, B7, B8 compared with the artboards
+- [x] The keyboard does not cover the field being edited on the simulator
 
 ## References
 
