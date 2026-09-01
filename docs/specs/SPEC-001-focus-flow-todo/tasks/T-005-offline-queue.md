@@ -114,6 +114,33 @@ was called.
 - [ ] Airplane mode: create and edit, restart the app, restore the network, then confirm both
       changes on the server with a direct API read — not by looking at the app
 
+## Additional scenarios found during implementation
+
+Appended per verification-checklist §0. Each is covered by a test unless marked otherwise.
+
+- **A task deleted while its update is in flight must not come back.** When an update and a
+  delete are queued against the same task, the update drains first and its response would
+  re-insert the record the delete had already removed optimistically — visible for one frame,
+  and persisted in that state if the process died in between. The merge on update success is
+  therefore guarded on the record still being cached.
+- **A create that fails terminally orphans the entries queued behind it.** They target a
+  local id the server never issued, so each one 404s and is dropped by the `notFound` path.
+  Self-healing, and deliberately not special-cased: collapsing the queue would be more code
+  than the case is worth.
+- **A rolled-back entry leaves later entries for the same task holding a stale `previous`
+  snapshot.** Rolling one of those back restores a state that never reached the server.
+  Known limitation; the alternative is a per-task rollback chain, which is out of proportion
+  to this scope. Not covered by a test, because the behaviour is not one worth pinning.
+- **A persisted record that fails its guard is dropped, not thrown on.** Restore runs during
+  app start, so one malformed entry written by an older build must cost one unsynced change
+  rather than the ability to open the app.
+- **Anything other than an `ApiError` escaping the transport is treated as terminal.** The API
+  layer throws nothing else, so it means a defect in this app; retrying it would block every
+  entry behind it forever.
+- **`mergeServerTasks` protects a task with a queued entry from the server's version.** A
+  first sync must not overwrite an edit that has not drained, nor resurrect a task whose
+  delete is still queued.
+
 ## References
 
 - Epic §11.3, §12.2, §16.6
