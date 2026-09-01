@@ -123,3 +123,28 @@ unit under test would prove nothing (VR-11).
 - Epic §7.3 G, §16.4, §23.1
 - Config: `Tech Assignment/GoogleService-Info.plist`, project `todolist-b4a98`
 - Test credentials: `+972 52-828-7009` / `123456`
+
+## Additional scenarios discovered during implementation
+
+- **S-4 — a configured test number still hits reCAPTCHA on iOS.** The task assumed a
+  Firebase test phone number "skips app verification entirely". That is true of the
+  _server_, not of the iOS client: the SDK attempts APNs silent-push verification before it
+  ever tells the server which number is being signed in, and with no APNs key it falls back
+  to opening the reCAPTCHA web flow. `+972 52-828-7009` reaches that fallback. Setting
+  `getAuth().settings.appVerificationDisabledForTesting = true` before
+  `signInWithPhoneNumber` is what makes the client skip app verification, after which the
+  documented number and code sign in immediately. Verified both ways on the simulator; the
+  decision about whether that setting ships is recorded in the T-007 hand-off.
+- **S-5 — sign-out is optimistic.** The store clears the local session before the provider
+  call resolves, so the user is not made to watch a spinner for a local operation. The auth
+  listener re-asserts the same state immediately afterwards, so the two cannot drift. A
+  provider rejection is reported rather than swallowed, because a provider that refused to
+  clear its own state would otherwise resurface as a session that returns after a relaunch.
+- **S-6 — the store is subscribed at import, not from a provider component.** The session is
+  a process-lifetime fact and the listener has to be running before the first render, so
+  `sessionStore.ts` subscribes at module scope. `src/app/` is not in this task's scope and
+  needs no change for session restoration to work.
+- **Blocked elsewhere — `RootNavigator` does not yet consume `isInitialising`.** The flag is
+  implemented and tested, but the navigator switches on `useIsSignedIn()` alone, so a
+  returning user can still see one frame of the welcome screen. Wiring it is T-008/T-012
+  work; the store's surface is ready for it.

@@ -1,11 +1,23 @@
 /**
  * The authentication feature's public surface.
  *
- * Today it is a session stub: a flag defaulting to signed-out, so the root navigator has
- * something real to switch on before Firebase exists. T-007 replaces `model/sessionStore.ts`
- * with the Firebase-backed store and keeps this barrel's shape, so the navigator and the
- * screens that consume it do not change.
+ * The provider lives behind `AuthService`: screens send a code, confirm a code, and read
+ * the session, and none of them imports `@react-native-firebase/auth` or ever sees a raw
+ * Firebase error. `AuthError.failure` is the only failure shape that crosses this line.
  *
- * It lives here rather than in `shared/store/` because that directory belongs to T-006.
+ * It lives here rather than in `shared/store/` because the session is not cross-cutting
+ * infrastructure — it is this feature's state, and `shared/` may not import from a feature.
  */
-export { signIn, signOut, useIsSignedIn } from './model/sessionStore';
+export { AuthError, isAuthError } from './model/AuthError';
+export type { AuthFailure } from './model/AuthFailure';
+export { toAuthFailure } from './model/AuthFailure';
+export type { AuthService, ConfirmationHandle } from './model/AuthService';
+export { firebaseAuthService } from './model/firebaseAuthService';
+export {
+  signIn,
+  signOut,
+  startSessionObserver,
+  useIsSessionInitialising,
+  useIsSignedIn,
+  useSessionPhoneNumber,
+} from './model/sessionStore';

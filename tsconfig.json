@@ -24,6 +24,6 @@
       "@store/*": ["src/shared/store/*"]
     }
   },
-  "include": ["src", "index.js", "*.ts", "*.tsx"],
+  "include": ["src", "__mocks__", "index.js", "*.ts", "*.tsx"],
   "exclude": ["node_modules", "ios", "android"]
 }
