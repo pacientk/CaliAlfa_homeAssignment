@@ -3,13 +3,12 @@ import { AppSearchField, AppView } from '@ui/atoms';
 import { useThemedStyles } from '@ui/tokens';
 import type { JSX } from 'react';
 
-import { FocusModeBlock } from '../FocusModeBlock';
 import { MomentumCard } from '../MomentumCard';
 import type { ITaskListHeaderProps } from './ITaskListHeader';
 import { makeTaskListHeaderStyles } from './TaskListHeader.styles';
 
 /**
- * Everything above the rows on artboards B1–B5: the momentum card, the decorative focus
+ * Everything above the rows on artboards B1–B5: the momentum card, the
  * block, and the search field.
  *
  * It is one widget rather than three siblings in the screen because the list draws it in two
@@ -22,19 +21,12 @@ export const TaskListHeader = ({
   onSearchQueryChange,
   onClearSearchQuery,
   hasSearchField,
-  hasFocusModeBlock,
 }: ITaskListHeaderProps): JSX.Element => {
   const styles = useThemedStyles(makeTaskListHeaderStyles);
 
   return (
     <AppView style={styles.header}>
       <MomentumCard summary={summary} />
-
-      {hasFocusModeBlock ? (
-        <AppView style={styles.focusBlock}>
-          <FocusModeBlock />
-        </AppView>
-      ) : null}
 
       {hasSearchField ? (
         <AppSearchField

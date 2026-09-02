@@ -101,7 +101,6 @@ export const TaskListScreen = ({ onCreateTask, onOpenTask }: ITaskListScreenProp
       onSearchQueryChange={search.setQuery}
       onClearSearchQuery={search.clearQuery}
       hasSearchField={hasTasks}
-      hasFocusModeBlock={hasVisibleTasks}
     />
   );
 
