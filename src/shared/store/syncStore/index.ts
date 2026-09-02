@@ -6,4 +6,5 @@ export {
   useLastSyncError,
   usePendingCount,
   useSetFirstSyncError,
+  useShouldAttempt,
 } from './useSyncStatus';

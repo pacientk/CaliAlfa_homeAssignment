@@ -107,6 +107,7 @@ export const createTaskSyncBindings = (
     queryClient.setQueryData<CachedTask[]>(taskQueryKeys.list, snapshot.tasks);
     useSyncStore.getState().setSyncState({
       isOnline: snapshot.isOnline,
+      shouldAttempt: snapshot.shouldAttempt,
       pendingCount: snapshot.pendingCount,
       lastError: snapshot.lastFailure?.kind,
     });

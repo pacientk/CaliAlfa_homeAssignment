@@ -44,17 +44,21 @@ const serverTask = (id: string, overrides: Partial<Task> = {}): Task => ({
 
 interface FakeConnectivity extends ConnectivityService {
   setIsOnline(isNextOnline: boolean): void;
+  /** Grants the one attempt a probe buys, without claiming the network is back. */
+  setProbeDue(isNextProbeDue: boolean): void;
   readonly reportedFailures: ApiFailure[];
 }
 
 const createFakeConnectivity = (): FakeConnectivity => {
   let isOnline = true;
+  let isProbeDue = false;
   const listeners = new Set<() => void>();
   const reportedFailures: ApiFailure[] = [];
 
   return {
     reportedFailures,
     getIsOnline: (): boolean => isOnline,
+    getShouldAttempt: (): boolean => isOnline || isProbeDue,
     subscribe: (listener: () => void): (() => void) => {
       listeners.add(listener);
       return () => {
@@ -70,6 +74,16 @@ const createFakeConnectivity = (): FakeConnectivity => {
         return;
       }
       isOnline = isNextOnline;
+      isProbeDue = false;
+      for (const listener of listeners) {
+        listener();
+      }
+    },
+    setProbeDue: (isNextProbeDue: boolean): void => {
+      if (isProbeDue === isNextProbeDue) {
+        return;
+      }
+      isProbeDue = isNextProbeDue;
       for (const listener of listeners) {
         listener();
       }
@@ -770,5 +784,51 @@ describe('the snapshot T-006 will bind to', () => {
     harness.engine.subscribe(listener)();
     harness.engine.enqueueCreate(draftOf());
     expect(listener).not.toHaveBeenCalled();
+  });
+});
+
+/**
+ * The snapshot feeds the offline banner, and the two connectivity answers are easy to confuse:
+ * one is what the app believes, the other is permission to spend a request finding out. Wiring
+ * the banner to the second is the defect these pin — it made the indicator flicker green once
+ * every probe for the whole of an outage, and vanish entirely when there was nothing queued to
+ * fail again.
+ */
+describe('what the snapshot tells the banner while the device is offline', () => {
+  it('publishes the belief, so a probe coming due does not read as a connection', () => {
+    const harness = setup();
+    harness.connectivity.setIsOnline(false);
+
+    harness.connectivity.setProbeDue(true);
+
+    expect(harness.engine.getSnapshot().isOnline).toBe(false);
+    expect(harness.engine.getSnapshot().shouldAttempt).toBe(true);
+  });
+
+  it('wakes the drain itself when the probe comes due, without being asked to', async () => {
+    const harness = setup();
+    harness.connectivity.setIsOnline(false);
+    harness.engine.enqueueCreate(draftOf());
+    expect(harness.transport.calls).toHaveLength(0);
+
+    // Nothing calls `drain` here. The engine subscribes to connectivity, and a probe coming due
+    // is the only moment during an outage when an attempt is worth making.
+    harness.connectivity.setProbeDue(true);
+    await Promise.resolve();
+
+    expect(harness.transport.calls).toHaveLength(1);
+  });
+
+  it('still spends the attempt the probe bought, believing itself offline the whole time', async () => {
+    const harness = setup();
+    harness.connectivity.setIsOnline(false);
+    harness.engine.enqueueCreate(draftOf());
+    expect(harness.transport.calls).toHaveLength(0);
+
+    harness.connectivity.setProbeDue(true);
+    await harness.engine.drain();
+
+    expect(harness.transport.calls).toHaveLength(1);
+    expect(harness.engine.getSnapshot().isOnline).toBe(false);
   });
 });

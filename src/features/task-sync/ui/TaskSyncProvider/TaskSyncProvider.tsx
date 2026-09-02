@@ -1,7 +1,7 @@
 import { taskQueryKeys } from '@features/task-sync/model/taskQueryKeys';
 import { createTaskSyncBindings } from '@features/task-sync/model/taskSyncBindings';
 import { TaskSyncContext } from '@features/task-sync/model/TaskSyncContext';
-import { useIsOnline } from '@store/syncStore';
+import { useShouldAttempt } from '@store/syncStore';
 import { QueryClientProvider } from '@tanstack/react-query';
 import type { JSX } from 'react';
 import { useEffect, useState } from 'react';
@@ -22,18 +22,22 @@ export const TaskSyncProvider = ({
   bindings: injectedBindings,
 }: ITaskSyncProviderProps): JSX.Element => {
   const [bindings] = useState(() => injectedBindings ?? createTaskSyncBindings());
-  const isOnline = useIsOnline();
+  const shouldAttempt = useShouldAttempt();
 
   // Publishes every engine snapshot into the query cache and the sync store, and stops
   // when the provider unmounts.
   useEffect(() => bindings.connect(), [bindings]);
 
   useEffect(() => {
-    // The store value is the trigger — it re-runs this effect when connectivity changes —
-    // and the engine's own snapshot is the decision, because the store is one render
-    // behind during the commit that first connects it.
-    const isEngineOnline = bindings.engine.getSnapshot().isOnline;
-    if (!isOnline || !isEngineOnline) {
+    // The store value is the trigger — it re-runs this effect when connectivity changes — and
+    // the engine's own snapshot is the decision, because the store is one render behind during
+    // the commit that first connects it.
+    //
+    // It gates on the permission rather than the belief. After an outage the belief only turns
+    // true once a request has succeeded, and with an empty queue this sync is the only request
+    // there is to make: gating on the belief would leave a cold start that failed offline
+    // waiting for evidence that nothing was left to produce.
+    if (!shouldAttempt || !bindings.engine.getSnapshot().shouldAttempt) {
       return;
     }
     // Prefetch rather than a query hook: nothing renders this result. It runs once per
@@ -43,7 +47,7 @@ export const TaskSyncProvider = ({
       queryKey: taskQueryKeys.firstSync,
       queryFn: bindings.syncTasks,
     });
-  }, [bindings, isOnline]);
+  }, [bindings, shouldAttempt]);
 
   return (
     <QueryClientProvider client={bindings.queryClient}>
