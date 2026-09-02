@@ -52,8 +52,9 @@ export const phoneNumber = {
   fieldPlaceholder: '666 55 44 33',
   /** The country segment of the field, and the sheet it opens. */
   prefixAccessibilityLabel: 'Country code',
-  prefixModal: {
+  prefixSheet: {
     title: 'Country code',
+    close: 'Close the country list',
   },
   /** Not drawn: the visible label is two words, and a screen reader needs the whole rule. */
   fieldAccessibilityLabel: 'Phone number, without the country code',

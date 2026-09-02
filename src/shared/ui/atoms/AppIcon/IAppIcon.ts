@@ -28,6 +28,7 @@ export type IconName =
   | 'edit'
   | 'error'
   | 'event'
+  | 'expand_less'
   | 'expand_more'
   | 'info'
   | 'light_mode'

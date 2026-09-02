@@ -136,7 +136,11 @@ describe('the phone number screen — sending', () => {
   it('starts on the country the project signs in from, and says so', async () => {
     await renderPhoneNumber();
 
-    expect(screen.getByText(DEFAULT_COUNTRY_PREFIX.dialCode)).toBeTruthy();
+    // A6 draws the trigger as the ISO code and the dial code together, so the current choice
+    // is readable without opening anything.
+    expect(
+      screen.getByText(`${DEFAULT_COUNTRY_PREFIX.iso} ${DEFAULT_COUNTRY_PREFIX.dialCode}`),
+    ).toBeTruthy();
     expect(DEFAULT_COUNTRY_PREFIX.dialCode).toBe('+972');
   });
 
@@ -164,6 +168,30 @@ describe('the phone number screen — sending', () => {
 
   it('does not open the picker on its own', async () => {
     await renderPhoneNumber();
+
+    expect(screen.queryByTestId('phoneNumber.prefixOption.ES')).toBeNull();
+  });
+
+  it('closes the sheet from its close button, without choosing anything', async () => {
+    const { service } = await renderPhoneNumber();
+    await typeNumber('528287009');
+
+    await fireEvent.press(screen.getByTestId('phoneNumber.prefix'));
+    await fireEvent.press(screen.getByTestId('phoneNumber.prefixSheet.close'));
+
+    expect(screen.queryByTestId('phoneNumber.prefixOption.ES')).toBeNull();
+
+    await pressNext();
+
+    // The country is untouched: closing is not choosing.
+    expect(service.requestedPhones).toEqual(['+972528287009']);
+  });
+
+  it('closes the sheet when the scrim is tapped', async () => {
+    await renderPhoneNumber();
+
+    await fireEvent.press(screen.getByTestId('phoneNumber.prefix'));
+    await fireEvent.press(screen.getByTestId('phoneNumber.prefixSheet.scrim'));
 
     expect(screen.queryByTestId('phoneNumber.prefixOption.ES')).toBeNull();
   });

@@ -38,7 +38,7 @@ export type { IAuthPrimaryButtonProps } from './ui/AuthPrimaryButton';
 export { AuthPrimaryButton } from './ui/AuthPrimaryButton';
 export type { IAuthTopBarProps } from './ui/AuthTopBar';
 export { AuthTopBar } from './ui/AuthTopBar';
-export { CountryPrefixModal } from './ui/CountryPrefixModal';
+export { CountryPrefixSheet } from './ui/CountryPrefixSheet';
 export type { IOtpCodeRowProps } from './ui/OtpCodeRow';
 export { OTP_CODE_LENGTH, OtpCodeRow } from './ui/OtpCodeRow';
 export type { IPhoneNumberFieldProps } from './ui/PhoneNumberField';

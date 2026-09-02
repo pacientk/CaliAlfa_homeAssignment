@@ -5,7 +5,7 @@ import { useThemedStyles } from '@ui/tokens';
 import type { JSX } from 'react';
 import { useState } from 'react';
 
-import { CountryPrefixModal } from '../CountryPrefixModal';
+import { CountryPrefixSheet } from '../CountryPrefixSheet';
 import type { IPhoneNumberFieldProps } from './IPhoneNumberField';
 import { makePhoneNumberFieldStyles } from './PhoneNumberField.styles';
 
@@ -38,9 +38,12 @@ export const PhoneNumberField = ({
   const [isPickerOpen, setIsPickerOpen] = useState(false);
 
   const hasError = errorMessage !== undefined && errorMessage.length > 0;
+  // The sheet being open is a focused state for the field as a whole: A6 draws the frame with
+  // the 2 pt brand ring while the picker is up, even though the text input itself is not
+  // focused.
   const frameState = hasError
     ? styles.frameError
-    : isFocused
+    : isFocused || isPickerOpen
       ? styles.frameFocused
       : styles.frameResting;
 
@@ -71,8 +74,14 @@ export const PhoneNumberField = ({
           style={styles.prefix}
           testID="phoneNumber.prefix"
         >
-          <AppText variant="body">{prefix.dialCode}</AppText>
-          <AppIcon name="expand_more" size="size20" color="secondary" />
+          <AppText variant="bodyStrong" color={isPickerOpen ? 'accent' : 'primary'}>
+            {`${prefix.iso} ${prefix.dialCode}`}
+          </AppText>
+          <AppIcon
+            name={isPickerOpen ? 'expand_less' : 'expand_more'}
+            size="size20"
+            color={isPickerOpen ? 'accent' : 'secondary'}
+          />
         </AppPressable>
 
         <AppView style={styles.divider} />
@@ -105,12 +114,12 @@ export const PhoneNumberField = ({
         </AppView>
       ) : null}
 
-      <CountryPrefixModal
+      <CountryPrefixSheet
         isVisible={isPickerOpen}
         selectedIso={prefix.iso}
         onSelect={choosePrefix}
         onRequestClose={closePicker}
-        testID="phoneNumber.prefixModal"
+        testID="phoneNumber.prefixSheet"
       />
     </AppView>
   );
