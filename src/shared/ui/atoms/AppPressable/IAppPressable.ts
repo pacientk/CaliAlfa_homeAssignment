@@ -24,6 +24,12 @@ export interface IAppPressableProps {
   /** `checked`, `selected`, `expanded`. `disabled` is derived from `isDisabled` and ignored here. */
   readonly accessibilityState?: Omit<AccessibilityState, 'disabled'>;
   readonly isDisabled?: boolean;
+  /**
+   * Turns off the press scale. For a control that is already its own feedback — a switch
+   * whose knob travels, a checkbox that fills — the scale reads as a button underneath it,
+   * which is a second thing happening for one action.
+   */
+  readonly hasPressFeedback?: boolean;
   readonly style?: StyleProp<ViewStyle>;
   readonly testID?: string;
 }

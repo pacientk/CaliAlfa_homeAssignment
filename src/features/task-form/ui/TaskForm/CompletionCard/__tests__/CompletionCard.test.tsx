@@ -31,7 +31,7 @@ describe('the completion row on the edit screen', () => {
   it('shows a completed task in the switch alone', async () => {
     await renderCard(true);
 
-    expect(screen.getByTestId('completion.track')).toHaveStyle({
+    expect(screen.getByTestId('completion')).toHaveStyle({
       backgroundColor: lightTheme.colors.primary.base,
     });
   });
@@ -39,7 +39,7 @@ describe('the completion row on the edit screen', () => {
   it('shows an unfinished one the same way — the paired half of the rule above', async () => {
     await renderCard(false);
 
-    expect(screen.getByTestId('completion.track')).toHaveStyle({
+    expect(screen.getByTestId('completion')).toHaveStyle({
       backgroundColor: lightTheme.colors.surface.containerHighest,
     });
   });
@@ -50,6 +50,20 @@ describe('the completion row on the edit screen', () => {
     await fireEvent.press(screen.getByRole('switch'));
 
     expect(onToggle).toHaveBeenCalledWith(true);
+  });
+
+  it('answers to the switch and not to the label beside it', async () => {
+    // The whole row used to be the control: a settings label that looked like text and
+    // answered to touch, with a button's press-scale under it. Only the switch responds now.
+    const onToggle = await renderCard(false);
+
+    await fireEvent.press(screen.getByText('Mark as completed'));
+
+    expect(onToggle).not.toHaveBeenCalled();
+
+    await fireEvent.press(screen.getByRole('switch'));
+
+    expect(onToggle).toHaveBeenCalledTimes(1);
   });
 
   it('does not report anything on its own', async () => {
