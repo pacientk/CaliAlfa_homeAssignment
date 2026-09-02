@@ -27,8 +27,7 @@ export const DeleteTaskDialog = ({
       onRequestClose={onCancel}
       title={strings.taskList.deleteDialog.title}
       closeLabel={strings.taskList.deleteDialog.cancel}
-      isDismissableByScrim={false}
-      hasCloseButton={false}
+      variant="confirmation"
       accessibilityLabel={strings.taskList.deleteDialog.title}
       testID="taskList.deleteDialog"
     >

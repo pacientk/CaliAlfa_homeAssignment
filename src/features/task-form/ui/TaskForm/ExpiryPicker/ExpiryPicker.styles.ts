@@ -25,6 +25,9 @@ export const makeExpiryPickerStyles = (theme: Theme): ExpiryPickerStyles =>
     card: {
       paddingHorizontal: theme.spacing.space20,
       paddingTop: theme.spacing.space16,
+      // Same reason as the confirmation sheet: the safe-area inset is cleared by the sheet,
+      // and this is the air the actions need above the home indicator inside it.
+      paddingBottom: theme.spacing.space24,
       ...theme.shadows.level2,
     },
     title: {

@@ -17,7 +17,7 @@ import type { FakeAuthService } from '@features/auth/testing/authServiceDouble';
 import { createFakeAuthService } from '@features/auth/testing/authServiceDouble';
 import { isDisabled, propOf, styleOf } from '@features/auth/testing/renderedElement';
 import { strings } from '@lib/strings';
-import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { lightTheme, ThemeProvider } from '@ui/tokens';
 import type { ReactNode } from 'react';
 import type * as SafeAreaContext from 'react-native-safe-area-context';
@@ -163,7 +163,12 @@ describe('the phone number screen — sending', () => {
 
     await fireEvent.press(screen.getByTestId('phoneNumber.prefixOption.ES'));
 
-    expect(screen.queryByTestId('phoneNumber.prefixOption.ES')).toBeNull();
+    // The sheet stays mounted while it animates out — unmounting on the first frame is what
+    // makes a dismissal look like a cut — so this waits for the exit rather than asserting
+    // that it already happened.
+    await waitFor(() => {
+      expect(screen.queryByTestId('phoneNumber.prefixOption.ES')).toBeNull();
+    });
   });
 
   it('does not open the picker on its own', async () => {
@@ -179,7 +184,9 @@ describe('the phone number screen — sending', () => {
     await fireEvent.press(screen.getByTestId('phoneNumber.prefix'));
     await fireEvent.press(screen.getByTestId('phoneNumber.prefixSheet.close'));
 
-    expect(screen.queryByTestId('phoneNumber.prefixOption.ES')).toBeNull();
+    await waitFor(() => {
+      expect(screen.queryByTestId('phoneNumber.prefixOption.ES')).toBeNull();
+    });
 
     await pressNext();
 
@@ -193,7 +200,9 @@ describe('the phone number screen — sending', () => {
     await fireEvent.press(screen.getByTestId('phoneNumber.prefix'));
     await fireEvent.press(screen.getByTestId('phoneNumber.prefixSheet.scrim'));
 
-    expect(screen.queryByTestId('phoneNumber.prefixOption.ES')).toBeNull();
+    await waitFor(() => {
+      expect(screen.queryByTestId('phoneNumber.prefixOption.ES')).toBeNull();
+    });
   });
 
   it('shows the failure in the field and does not move on when the provider refuses', async () => {

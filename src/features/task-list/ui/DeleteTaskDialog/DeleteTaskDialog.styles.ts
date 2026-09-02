@@ -32,7 +32,9 @@ export const makeDeleteTaskDialogStyles = (theme: Theme): DeleteTaskDialogStyles
     card: {
       paddingHorizontal: theme.spacing.space20,
       paddingTop: theme.spacing.space16,
-      paddingBottom: theme.spacing.space8,
+      // The sheet already clears the safe area; this is the air the buttons need above the
+      // home indicator, which lives inside that inset and makes a flush edge read as cramped.
+      paddingBottom: theme.spacing.space24,
     },
     message: {},
     actions: {

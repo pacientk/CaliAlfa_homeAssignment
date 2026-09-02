@@ -6,8 +6,9 @@ jest.mock('react-native-safe-area-context', () => {
 });
 
 import { fireEvent, render, screen } from '@testing-library/react-native';
+import type { BottomSheetVariant } from '@ui/atoms';
 import { AppBottomSheet, AppText } from '@ui/atoms';
-import { ThemeProvider } from '@ui/tokens';
+import { lightTheme, ThemeProvider } from '@ui/tokens';
 import type * as SafeAreaContext from 'react-native-safe-area-context';
 
 /**
@@ -17,8 +18,7 @@ import type * as SafeAreaContext from 'react-native-safe-area-context';
  */
 const renderSheet = async (props: {
   readonly onRequestClose: () => void;
-  readonly isDismissableByScrim?: boolean;
-  readonly hasCloseButton?: boolean;
+  readonly variant?: BottomSheetVariant;
 }): Promise<void> => {
   await render(
     <AppBottomSheet
@@ -28,10 +28,7 @@ const renderSheet = async (props: {
       closeLabel="Close"
       accessibilityLabel="Country code"
       testID="sheet"
-      {...(props.isDismissableByScrim === undefined
-        ? {}
-        : { isDismissableByScrim: props.isDismissableByScrim })}
-      {...(props.hasCloseButton === undefined ? {} : { hasCloseButton: props.hasCloseButton })}
+      {...(props.variant === undefined ? {} : { variant: props.variant })}
     >
       <AppText>Body</AppText>
     </AppBottomSheet>,
@@ -60,13 +57,31 @@ describe('the bottom sheet', () => {
 
   it('offers neither exit when it is asking a destructive question', async () => {
     const onRequestClose = jest.fn();
-    await renderSheet({ onRequestClose, isDismissableByScrim: false, hasCloseButton: false });
+    await renderSheet({ onRequestClose, variant: 'confirmation' });
 
     expect(screen.queryByTestId('sheet.close')).toBeNull();
 
     await fireEvent.press(screen.getByTestId('sheet.scrim'));
 
     expect(onRequestClose).not.toHaveBeenCalled();
+  });
+
+  it('gives a destructive question the display face', async () => {
+    await renderSheet({ onRequestClose: jest.fn(), variant: 'confirmation' });
+
+    expect(screen.getByRole('header', { name: 'Country code' })).toHaveStyle({
+      fontSize: lightTheme.typography.title.fontSize,
+    });
+  });
+
+  it('keeps a picker heading quiet — the paired half of the rule above', async () => {
+    // A picker's header is a caption for a list. Giving it the same weight as a destructive
+    // question would flatten the only difference between the two shapes.
+    await renderSheet({ onRequestClose: jest.fn() });
+
+    expect(screen.getByRole('header', { name: 'Country code' })).toHaveStyle({
+      fontSize: lightTheme.typography.label.fontSize,
+    });
   });
 
   it('does not close on its own', async () => {

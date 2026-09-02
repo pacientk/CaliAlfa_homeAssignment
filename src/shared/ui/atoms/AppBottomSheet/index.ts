@@ -1,2 +1,2 @@
 export { AppBottomSheet } from './AppBottomSheet';
-export type { IAppBottomSheetProps } from './IAppBottomSheet';
+export type { BottomSheetVariant, IAppBottomSheetProps } from './IAppBottomSheet';
