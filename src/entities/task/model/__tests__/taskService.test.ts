@@ -2,7 +2,7 @@ import type { ApiError } from '@shared/api';
 import { isApiError } from '@shared/api';
 
 import type { Task, TaskDraft } from '../Task';
-import { createTask, deleteTask, fetchTask, fetchTaskPage, updateTask } from '../taskService';
+import { createTask, deleteTask, fetchTaskPage, updateTask } from '../taskService';
 
 /** Only `status` and `json()` are read by the client — see httpClient.test.ts. */
 const jsonResponse = (status: number, body: unknown): Response =>
@@ -107,29 +107,6 @@ describe('fetchTaskPage', () => {
     );
 
     await expect(failureOf(fetchTaskPage(1, 20))).resolves.toMatchObject({ kind: 'transport' });
-  });
-});
-
-describe('fetchTask', () => {
-  it('requests the record by id and maps it', async () => {
-    fetchMock.mockResolvedValue(jsonResponse(200, wireRecord));
-
-    await expect(fetchTask('7')).resolves.toEqual(domainRecord);
-    expect(lastCall()[0]).toContain('/tasks/7');
-  });
-
-  it('percent-encodes an id that is not URL-safe', async () => {
-    fetchMock.mockResolvedValue(jsonResponse(200, wireRecord));
-
-    await fetchTask('a/b?c');
-
-    expect(lastCall()[0]).toContain('/tasks/a%2Fb%3Fc');
-  });
-
-  it('reports a missing record as notFound, which the queue treats as terminal', async () => {
-    fetchMock.mockResolvedValue(jsonResponse(404, { message: 'Not found' }));
-
-    await expect(failureOf(fetchTask('7'))).resolves.toEqual({ kind: 'notFound' });
   });
 });
 
@@ -280,6 +257,16 @@ describe('deleteTask', () => {
     expect(init.body).toBeUndefined();
   });
 
+  it('percent-encodes an id that is not URL-safe', async () => {
+    fetchMock.mockResolvedValue(jsonResponse(200, wireRecord));
+
+    await deleteTask('a/b?c');
+
+    // `taskPath` is shared by every by-id call; an unencoded slash would address a different
+    // resource entirely rather than fail loudly.
+    expect(lastCall()[0]).toContain('/tasks/a%2Fb%3Fc');
+  });
+
   it('reports an already-deleted record as notFound', async () => {
     fetchMock.mockResolvedValue(jsonResponse(404, { message: 'Not found' }));
 
@@ -291,7 +278,7 @@ describe('the service never reaches the live API', () => {
   it('makes every call through the injected fetch stub', async () => {
     fetchMock.mockResolvedValue(jsonResponse(200, wireRecord));
 
-    await fetchTask('7');
+    await deleteTask('7');
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });

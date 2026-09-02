@@ -33,12 +33,6 @@ export const fetchTaskPage = async (page: number, limit: number): Promise<Task[]
   return parseTaskList(body);
 };
 
-/** `GET /tasks/:id`. Rejects with a `notFound` failure when the record is gone. */
-export const fetchTask = async (id: string): Promise<Task> => {
-  const body = await requestJson({ method: 'GET', path: taskPath(id) });
-  return parseTask(body);
-};
-
 /** `POST /tasks`. Always sends `createdAt`, so the stored moment is the local one. */
 export const createTask = async (draft: TaskDraft): Promise<Task> => {
   const body = await requestJson({
