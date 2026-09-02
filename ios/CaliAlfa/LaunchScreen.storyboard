@@ -7,6 +7,11 @@
   than theme tokens, and the type is the system face rather than the bundled Inter, because a
   launch screen cannot rely on a font the app registers at startup.
 
+  The field is the brand purple rather than the app's own background, so this does not blend
+  into the first screen the way a launch screen usually should — it is a deliberate brand beat,
+  held for a moment by AppDelegate. The name is white because it has to carry against that
+  field; it is not the text colour the app uses anywhere else.
+
   The corners are baked into this copy of the mark rather than rounded here, because a launch
   screen may not carry user-defined runtime attributes — the storyboard compiler rejects the
   build outright. So there are two copies of one square: the app icon, which iOS masks itself,
@@ -42,13 +47,13 @@
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Focus &amp; Flow" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lbl-Na-me0">
                                         <rect key="frame" x="0.0" y="120" width="180" height="34"/>
                                         <fontDescription key="fontDescription" type="boldSystem" pointSize="28"/>
-                                        <color key="textColor" red="0.10980392156862745" green="0.10196078431372549" blue="0.13725490196078433" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                 </subviews>
                             </stackView>
                         </subviews>
-                        <color key="backgroundColor" red="0.99215686274509807" green="0.97254901960784312" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <color key="backgroundColor" red="0.36470588235294116" green="0.24705882352941178" blue="0.82745098039215681" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="stk-La-unc" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="ctr-x0-000"/>
                             <constraint firstItem="stk-La-unc" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="ctr-y0-000"/>
