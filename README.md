@@ -53,7 +53,7 @@ take several minutes; everything after is incremental. Then sign in with your te
 ```bash
 npx tsc --noEmit              # exits 0
 npm run lint                  # 0 errors, 0 warnings
-npm test                      # 744 tests across 65 suites
+npm test                      # 754 tests across 65 suites
 ```
 
 `npm run lint` prints several `[boundaries][warning]` lines first. Those are deprecation notices
@@ -168,9 +168,10 @@ Query's own persistence was the cheap option and the wrong tool: its cache model
 write that must survive a restart and replay in order. A local database as the source of truth is
 the robust answer and the wrong size — its schema and migrations would outweigh the feature set.
 What ships is a persisted queue in front of a typed API client, with the query cache as the read
-model, hydrated synchronously from MMKV before the first fetch. Around 200 lines in
-`src/features/task-sync/model/taskSyncEngine.ts` with no React in it, which is what makes the
-offline claim testable in-process.
+model, hydrated synchronously from MMKV before the first fetch. It is
+`src/features/task-sync/model/taskSyncEngine.ts` — 387 lines, of which about 280 are code and
+the rest is the reasoning behind the parts that are not obvious — with no React in it, which is
+what makes the offline claim testable in-process.
 
 Its invariants: entries drain strictly in order, so a create precedes the update that depends on
 it; a confirmed create's server id replaces the local one in the cache **and** in every entry
@@ -185,19 +186,23 @@ only client state that outlives a screen — the session, the in-flight verifica
 status — read through typed selector hooks. Mirroring server data into a client store is what
 produces two sources of truth and, a week later, a list and a detail screen that disagree.
 
-Three conventions the lint rules enforce, each buying something hard to retrofit. React Native
-primitives are banned outside `src/shared/ui/atoms/`, so no hex string exists above the token
-layer, the 44 pt touch floor comes from hit area rather than inflated visual sizes, and lists
-recycle by default. A screen may not import a route constant — `ROUTES` sits above `screens/` in
-the layer order — so screens take callbacks and mount in tests with no navigation container. The
-React Compiler is on, so hand-written `memo` / `useMemo` / `useCallback` is banned; an exception
-needs a profiler capture showing a bail-out, and fixing the bail-out would be the real fix.
+Two conventions the lint rules enforce, each buying something hard to retrofit. React Native
+primitives are banned outside `src/shared/ui/atoms/` by `no-restricted-imports`, so no hex string
+exists above the token layer, the 44 pt touch floor comes from hit area rather than inflated
+visual sizes, and lists recycle by default. A screen may not import a route constant — `ROUTES`
+sits above `screens/` in the layer order, so the boundary rule rejects it — which is why screens
+take callbacks and mount in tests with no navigation container.
+
+One more is a review rule rather than a lint rule, and it is worth being exact about the
+difference: the React Compiler is on, so hand-written `memo` / `useMemo` / `useCallback` is
+banned, but nothing in `eslint.config.mjs` checks that. It holds today because the codebase
+contains none; it is enforced by whoever reads the diff.
 
 ---
 
 ## Testing
 
-744 tests across 65 suites, over the two places a defect stays invisible until it corrupts data —
+754 tests across 65 suites, over the two places a defect stays invisible until it corrupts data —
 title validation and the mutation queue — plus RNTL component tests over the row states, the
 empty states, and validation feedback. No test touches the live service.
 
@@ -231,8 +236,12 @@ Beyond the three at the top, and all of them recorded with a repro and a propose
 - **A response the app cannot parse reads as "Offline",** because an unreadable body is
   classified as a transport failure — so a proxy's HTML error page blames the user's connection
   for a server that answered. FW-07.
-- **The offline banner can lag a reconnect by five seconds,** since connectivity is inferred from
-  request outcomes rather than a native module. Self-correcting; it cannot wedge the queue.
+- **Connectivity is inferred from request outcomes, not from a native module,** which costs a
+  beat at each end. The app cannot know it is offline until something fails, so going offline
+  and touching nothing shows no banner; and once it does know, it only believes the network is
+  back when an attempt succeeds, which is at the next five-second probe. Between those it stays
+  offline and says so — the probe buys an attempt, it does not announce a recovery. Neither end
+  can wedge the queue.
 - **One residual sync race:** a mutation draining _while_ the first sync's pages are in flight
   can be dropped from the cache until the next app start. The write reaches the server either
   way. FW-04.
