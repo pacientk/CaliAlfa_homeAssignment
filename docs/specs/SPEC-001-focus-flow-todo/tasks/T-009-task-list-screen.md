@@ -23,7 +23,8 @@ Build the task list — the screen the assignment is really about — matching a
 - Header: centred "To-do", **no back button, no search icon**. This is a deliberate correction
   to the original mock; the on-screen field is the only search affordance.
 - Momentum card with completed and total counts and a progress bar. Expired tasks count.
-- The decorative Focus-mode block and pro-tip card, visually subordinate.
+- The decorative Focus-mode block and pro-tip card, visually subordinate. **(The Focus-mode
+  block was removed after delivery — see the note at the foot of this file.)**
 - Search field with a clear action, debounced at 200 ms, filtering by title on the client.
 - The list, through `AppFlashList`, newest first, with completed tasks staying in place.
 - The task row in all five states from the component sheet: default, completed, expired,
@@ -123,6 +124,23 @@ Appended per the verification checklist §0. Each one is covered by a test.
 - **S-9** — the floating "New task" button is hidden on the no-tasks state, whose own call to
   action replaces it. Artboard B4 draws no FAB; B5 does.
 - **S-10** — the decorative focus-mode block and the pro-tip card appear only while the list
-  has rows. Neither is drawn on B4 or B5.
+  has rows. Neither is drawn on B4 or B5. **(Half of this no longer ships: the focus-mode block
+  is gone. The rule still governs the pro-tip card.)**
 - **S-11** — the no-results copy names the **settled** query rather than the live field value,
   so the sentence and the list it explains cannot disagree mid-keystroke.
+
+---
+
+## Post-delivery note — the Focus-mode block was removed
+
+Merged as `fix/remove-focus-mode-block` on 2026-09-02, after this task was signed off, at the
+user's request: the block was decorative, reported no state, and was taking vertical space on
+the one screen where rows compete for it.
+
+That reverses `Tech Assignment/REQUIREMENTS.md` §7, which had agreed it would be "kept visually,
+no behaviour behind it". The requirement changed; the code followed it.
+
+The sentences above are left as they were written. This file is the record of what was executed
+in this task, and editing it to match a later decision would turn an audit trail into a story —
+so the correction is appended rather than applied. `epic.md` §26 carries the same change as a
+versioned row, and the epic is the document to read for what the app does now.
