@@ -118,7 +118,7 @@ export const TaskListScreen = ({ onCreateTask, onOpenTask }: ITaskListScreenProp
         </AppText>
       </AppView>
 
-      <AppView style={styles.content}>
+      <AppView style={styles.content} testID="taskList.scrollFrame">
         {hasVisibleTasks ? (
           <AppFlashList
             data={search.visibleTasks}

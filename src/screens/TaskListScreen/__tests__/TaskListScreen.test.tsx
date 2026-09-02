@@ -30,6 +30,7 @@ jest.mock('react-native-safe-area-context', () => {
 });
 
 import type { Task } from '@entities/task';
+import { propOf } from '@features/auth/testing/renderedElement';
 import type { CachedTask } from '@features/task-sync';
 import { readMutationQueue, writeTaskCache } from '@features/task-sync';
 import { cachedTaskOf, isoAt } from '@features/task-sync/testing/taskSyncFixtures';
@@ -40,6 +41,8 @@ import { createMemoryStorage } from '@shared/services/storage';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { lightTheme, ThemeProvider } from '@ui/tokens';
 import type { JSX, ReactNode } from 'react';
+import type { StyleProp, ViewStyle } from 'react-native';
+import { StyleSheet } from 'react-native';
 import type * as SafeAreaContext from 'react-native-safe-area-context';
 
 import { TaskListScreen } from '../TaskListScreen';
@@ -422,6 +425,23 @@ describe('the sync banner reports connectivity and the queue (AC-7, FR-23)', () 
     expect(screen.getByText(strings.syncBanner.offline)).toHaveStyle({
       color: lightTheme.colors.text.error,
     });
+  });
+
+  it('lets the scroll indicator reach the screen edge while the rows keep their margin', async () => {
+    // iOS draws the scroll indicator against the inside of the scroll view's own frame. Inset
+    // that frame and the indicator floats over the rows; so the frame is full-bleed and the
+    // 20 pt margin lives on the content it scrolls.
+    await mountScreen([taskOf('a', 1)]);
+
+    const frame = StyleSheet.flatten(
+      propOf<StyleProp<ViewStyle>>(screen.getByTestId('taskList.scrollFrame'), 'style'),
+    );
+    const content = StyleSheet.flatten(
+      propOf<StyleProp<ViewStyle>>(screen.getByTestId('taskList.list'), 'contentContainerStyle'),
+    );
+
+    expect(frame.paddingHorizontal).toBeUndefined();
+    expect(content).toMatchObject({ paddingHorizontal: lightTheme.spacing.space20 });
   });
 
   it('floats over the list rather than pushing it down', async () => {
