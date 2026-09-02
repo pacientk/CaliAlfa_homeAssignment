@@ -94,3 +94,33 @@ export const syncBanner = {
     client: 'The server rejected a change.',
   },
 } as const;
+
+/**
+ * The sheet that reports a first sync the app could not complete.
+ *
+ * Every message ends by saying the tasks are still on the device, because that is the one
+ * thing the user cannot see for themselves: the screen behind the sheet shows a list, and
+ * nothing on it distinguishes "this is everything" from "this is what we had before the
+ * server stopped answering".
+ *
+ * The table is total over the failure kinds even though two of them never open this sheet —
+ * an offline device is already saying so in the banner. Totality is what makes a kind added
+ * to `ApiFailure` a type error here rather than a blank sheet.
+ */
+export const syncErrorSheet = {
+  title: 'Could not load your tasks',
+  message: {
+    offline: 'There is no connection. The list is the copy saved on this device.',
+    transport:
+      "We couldn't reach the server. The list is the copy saved on this device, and it may be out of date.",
+    server:
+      'The server had a problem. The list is the copy saved on this device, and it may be out of date.',
+    notFound:
+      'The task list is not where the app expects to find it. The list is the copy saved on this device.',
+    client:
+      'The server refused the request. The list is the copy saved on this device, and it may be out of date.',
+  },
+  retry: 'Try again',
+  retrying: 'Trying\u2026',
+  close: 'Dismiss',
+} as const;

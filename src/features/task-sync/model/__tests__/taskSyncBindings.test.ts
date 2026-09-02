@@ -202,3 +202,62 @@ describe('createTaskSyncBindings — syncTasks (AC-4)', () => {
     expect(readTaskCache(harness.storage)[0]?.lastLocalWriteAt).toBe(isoAt(1));
   });
 });
+
+/**
+ * The read path had no way to say it had failed. The queue's failures reach the banner
+ * through the engine snapshot; a first sync that the server refused reached nothing at all,
+ * and connectivity — correctly — went on reporting the app online, so nothing re-ran it
+ * either. These are about the record the sheet reads.
+ */
+describe('createTaskSyncBindings — reporting a first sync the server refused', () => {
+  const firstSyncError = (): string | undefined => useSyncStore.getState().firstSyncError;
+
+  it('records the failure, because nothing else in the app will mention it', async () => {
+    const harness = setupTaskSync();
+    harness.pageSource.script(new ApiError({ kind: 'server', status: 500 }));
+
+    await expect(harness.bindings.syncTasks()).rejects.toThrow();
+
+    expect(firstSyncError()).toBe('server');
+  });
+
+  it('distinguishes a refused request from a broken one', async () => {
+    const harness = setupTaskSync();
+    harness.pageSource.script(new ApiError({ kind: 'client', status: 422 }));
+
+    await expect(harness.bindings.syncTasks()).rejects.toThrow();
+
+    expect(firstSyncError()).toBe('client');
+  });
+
+  it('clears the record once a later sync gets through', async () => {
+    const harness = setupTaskSync();
+    harness.pageSource.script(new ApiError({ kind: 'server', status: 500 }), []);
+
+    await expect(harness.bindings.syncTasks()).rejects.toThrow();
+    expect(firstSyncError()).toBe('server');
+
+    await harness.bindings.syncTasks();
+
+    expect(firstSyncError()).toBeUndefined();
+  });
+
+  it('stays quiet when the device is offline, which the banner is already saying', async () => {
+    const harness = setupTaskSync();
+    harness.connectivity.setIsOnline(false);
+    harness.pageSource.script(new ApiError({ kind: 'transport', cause: new Error('socket') }));
+
+    await expect(harness.bindings.syncTasks()).rejects.toThrow();
+
+    expect(firstSyncError()).toBeUndefined();
+  });
+
+  it('leaves a successful first sync with nothing to report', async () => {
+    const harness = setupTaskSync();
+    harness.pageSource.script([serverTaskOf('a1')]);
+
+    await harness.bindings.syncTasks();
+
+    expect(firstSyncError()).toBeUndefined();
+  });
+});

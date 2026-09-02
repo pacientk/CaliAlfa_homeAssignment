@@ -24,6 +24,28 @@ export interface SyncState {
 interface SyncStore extends SyncState {
   /** Replaces the whole state. The sync bindings are the only writer. */
   setSyncState(next: SyncState): void;
+  /**
+   * The first sync's failure, kept out of {@link SyncState} on purpose.
+   *
+   * `lastError` is the write queue giving up on a change the user made; this is the read
+   * path failing to load the list at all. Different events, different remedies: one rolled
+   * a change back, the other left the screen showing a cache that may be stale or empty and
+   * that nothing is going to refresh on its own. Folding them into one field would make
+   * "your change was rejected" and "we could not load anything" the same sentence.
+   *
+   * It is also why this is not part of the value `setSyncState` replaces — that call is the
+   * engine snapshot, and the read path is not in it.
+   */
+  firstSyncError?: SyncErrorKind;
+  /**
+   * Set by the first sync, cleared by it on success and by the sheet the user dismisses.
+   *
+   * Declared as a property rather than a method, unlike `setSyncState` above, because it is
+   * the one action a selector hands out as a value: it is read off the store and passed to a
+   * component, which detaches it from the object it was declared on. A method signature would
+   * be a promise about `this` that the call site does not keep.
+   */
+  readonly setFirstSyncError: (kind: SyncErrorKind | undefined) => void;
 }
 
 /**
@@ -43,5 +65,8 @@ export const useSyncStore = create<SyncStore>(set => ({
     // `lastError` is spelled out rather than spread: zustand merges shallowly, so an
     // absent key would leave a stale error on screen after the failure was cleared.
     set({ isOnline: next.isOnline, pendingCount: next.pendingCount, lastError: next.lastError });
+  },
+  setFirstSyncError: (kind: SyncErrorKind | undefined): void => {
+    set({ firstSyncError: kind });
   },
 }));
