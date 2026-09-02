@@ -28,3 +28,4 @@ export {
 } from './model/TaskFormValues';
 export type { ITaskFormProps } from './ui';
 export { TaskForm } from './ui';
+export { CompletionCard } from './ui/TaskForm/CompletionCard';

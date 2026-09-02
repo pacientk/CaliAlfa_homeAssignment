@@ -4,9 +4,6 @@ import { StyleSheet } from 'react-native';
 
 export interface CompletionCardStyles {
   readonly card: ViewStyle;
-  readonly box: ViewStyle;
-  readonly boxChecked: ViewStyle;
-  readonly boxUnchecked: ViewStyle;
   readonly label: TextStyle;
   readonly track: ViewStyle;
   readonly trackOn: ViewStyle;
@@ -14,17 +11,14 @@ export interface CompletionCardStyles {
   readonly knob: ViewStyle;
 }
 
-/** The box edge is 2 pt in every state, exactly as sheet D draws the row checkbox. */
-const BOX_BORDER_WIDTH = 2;
-
 /**
  * Artboard B8's "Mark as completed" row: a level-1 card, 14 × 16 padding, radius 16, holding
- * a 20 pt box, the label, and a 48 × 28 switch with a 24 pt knob inset by 2.
+ * the label and a 48 × 28 switch with a 24 pt knob inset by 2.
  *
- * The box is drawn here rather than composed from `entities/task`'s `TaskCheckbox` because
- * that component *is* a pressable — nesting it inside this card would put two competing
- * touch targets and two accessibility roles on one row. Here the box is the switch's
- * illustration, and the row is the control.
+ * The artboard also draws a checkbox at the head of the row. It is gone: two drawings of one
+ * boolean, side by side, read as two controls that might disagree. The switch is what the
+ * design uses for a setting, and the checkbox is what a task row uses — there it is the whole
+ * affordance rather than a second picture of one.
  */
 export const makeCompletionCardStyles = (theme: Theme): CompletionCardStyles =>
   StyleSheet.create({
@@ -37,22 +31,6 @@ export const makeCompletionCardStyles = (theme: Theme): CompletionCardStyles =>
       paddingVertical: theme.spacing.space14,
       paddingHorizontal: theme.spacing.space16,
       ...theme.shadows.level1,
-    },
-    box: {
-      width: theme.sizes.size20,
-      height: theme.sizes.size20,
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderRadius: theme.borderRadius.radius8,
-      borderWidth: BOX_BORDER_WIDTH,
-    },
-    boxChecked: {
-      backgroundColor: theme.colors.feedback.success,
-      borderColor: theme.colors.feedback.success,
-    },
-    boxUnchecked: {
-      backgroundColor: theme.colors.surface.lowest,
-      borderColor: theme.colors.border.base,
     },
     label: {
       flex: 1,
