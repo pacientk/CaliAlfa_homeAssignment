@@ -498,7 +498,7 @@ exist, so nothing in the app or its tests may depend on a particular row.
 
 - **Firebase Authentication**, project `todolist-b4a98`, phone provider. Signing in
   requires connectivity. The reviewer signs in with the configured test number
-  `+972 52-828-7009` / `123456`; Firebase test numbers skip app verification entirely,
+  a registered Firebase test number and its code; such numbers skip app verification entirely,
   which is what makes this work on a simulator with no APNs key.
 - **mockapi.io**, as described in §13.
 

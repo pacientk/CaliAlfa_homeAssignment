@@ -25,8 +25,8 @@ import type * as SafeAreaContext from 'react-native-safe-area-context';
 import { PhoneNumberScreen } from '../PhoneNumberScreen';
 
 /** The national half only — the country now comes from the picker, not from the keyboard. */
-const TEST_NATIONAL_TYPED = '52 828 7009';
-const TEST_PHONE_E164 = '+972528287009';
+const TEST_NATIONAL_TYPED = '50 000 0000';
+const TEST_PHONE_E164 = '+972500000000';
 
 interface MountedScreen {
   readonly service: FakeAuthService;
@@ -179,7 +179,7 @@ describe('the phone number screen — sending', () => {
 
   it('closes the sheet from its close button, without choosing anything', async () => {
     const { service } = await renderPhoneNumber();
-    await typeNumber('528287009');
+    await typeNumber('500000000');
 
     await fireEvent.press(screen.getByTestId('phoneNumber.prefix'));
     await fireEvent.press(screen.getByTestId('phoneNumber.prefixSheet.close'));
@@ -191,7 +191,7 @@ describe('the phone number screen — sending', () => {
     await pressNext();
 
     // The country is untouched: closing is not choosing.
-    expect(service.requestedPhones).toEqual(['+972528287009']);
+    expect(service.requestedPhones).toEqual(['+972500000000']);
   });
 
   it('closes the sheet when the scrim is tapped', async () => {

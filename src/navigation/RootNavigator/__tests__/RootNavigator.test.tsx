@@ -28,8 +28,8 @@ jest.mock('react-native-safe-area-context', () => {
 });
 
 /** The default country the picker starts on, plus the national digits typed into the field. */
-const TEST_NATIONAL = '528287009';
-const TEST_PHONE = '+972528287009';
+const TEST_NATIONAL = '500000000';
+const TEST_PHONE = '+972500000000';
 const TEST_CODE = '123456';
 
 /**

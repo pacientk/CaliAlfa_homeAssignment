@@ -32,7 +32,7 @@ jest.mock('react-native-safe-area-context', () => {
   };
 });
 
-const SESSION_PHONE = '+972528287009';
+const SESSION_PHONE = '+972500000000';
 
 const mockedSignOut = jest.mocked(signOut);
 const mockedPhoneNumber = jest.mocked(useSessionPhoneNumber);

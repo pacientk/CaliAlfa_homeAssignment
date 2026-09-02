@@ -26,7 +26,7 @@ import type * as SafeAreaContext from 'react-native-safe-area-context';
 
 import { VerificationCodeScreen } from '../VerificationCodeScreen';
 
-const TEST_PHONE = '+972528287009';
+const TEST_PHONE = '+972500000000';
 const TEST_CODE = '123456';
 const COUNTDOWN_SECONDS = 60;
 const ONE_SECOND_MS = 1_000;

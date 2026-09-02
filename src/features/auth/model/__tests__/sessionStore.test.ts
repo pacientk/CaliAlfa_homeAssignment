@@ -25,7 +25,7 @@ import { act, renderHook } from '@testing-library/react-native';
 
 const mockFirebaseSignOut = jest.mocked(firebaseSignOut);
 
-const TEST_PHONE = '+972528287009';
+const TEST_PHONE = '+972500000000';
 const OTHER_PHONE = '+972500000000';
 
 describe('the session store', () => {

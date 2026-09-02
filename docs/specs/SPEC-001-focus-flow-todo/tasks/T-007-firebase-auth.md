@@ -57,8 +57,8 @@ fallback has somewhere to return to, even though the test number should never re
 
 There is no APNs auth key for this project, so Firebase cannot perform silent-push device
 verification. Real phone numbers therefore cannot complete sign-in here. Firebase **test**
-phone numbers skip app verification entirely, which is why `+972 52-828-7009` with code
-`123456` works on a simulator with no APNs key. This is a limitation of the environment, not
+phone numbers skip app verification entirely, which is why a registered test number and its
+code work on a simulator with no APNs key. This is a limitation of the environment, not
 of the implementation, and it goes in the README rather than being quietly worked around.
 
 ### Service contract
@@ -122,7 +122,7 @@ unit under test would prove nothing (VR-11).
 
 - Epic §7.3 G, §16.4, §23.1
 - Config: `Tech Assignment/GoogleService-Info.plist`, project `todolist-b4a98`
-- Test credentials: `+972 52-828-7009` / `123456`
+- Test credentials: a number registered under Firebase's test phone numbers, and its code
 
 ## Additional scenarios discovered during implementation
 
@@ -130,7 +130,7 @@ unit under test would prove nothing (VR-11).
   Firebase test phone number "skips app verification entirely". That is true of the
   _server_, not of the iOS client: the SDK attempts APNs silent-push verification before it
   ever tells the server which number is being signed in, and with no APNs key it falls back
-  to opening the reCAPTCHA web flow. `+972 52-828-7009` reaches that fallback. Setting
+  to opening the reCAPTCHA web flow. A registered test number reaches that fallback. Setting
   `getAuth().settings.appVerificationDisabledForTesting = true` before
   `signInWithPhoneNumber` is what makes the client skip app verification, after which the
   documented number and code sign in immediately. Verified both ways on the simulator; the
