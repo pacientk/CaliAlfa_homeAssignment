@@ -21,6 +21,7 @@ export const AppPressable = ({
   accessibilityHint,
   accessibilityState,
   isDisabled = false,
+  hasPressFeedback = true,
   style,
   testID,
 }: IAppPressableProps): JSX.Element => {
@@ -39,7 +40,9 @@ export const AppPressable = ({
       testID={testID}
       style={state => [
         style,
-        state.pressed && !isDisabled ? appPressableStyles.pressed : appPressableStyles.resting,
+        state.pressed && !isDisabled && hasPressFeedback
+          ? appPressableStyles.pressed
+          : appPressableStyles.resting,
       ]}
     >
       {children}

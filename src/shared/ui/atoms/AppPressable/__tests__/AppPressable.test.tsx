@@ -12,12 +12,13 @@ const TOUCH_FLOOR = 44;
 
 const renderPressable = (
   onPress: jest.Mock,
-  options: { isDisabled?: boolean; style?: ViewStyle } = {},
+  options: { isDisabled?: boolean; hasPressFeedback?: boolean; style?: ViewStyle } = {},
 ): ReactTestInstance => {
   const renderer = renderWithTheme(
     <AppPressable
       onPress={onPress}
       isDisabled={options.isDisabled}
+      hasPressFeedback={options.hasPressFeedback}
       style={options.style}
       accessibilityRole="button"
       accessibilityLabel="Add task"
@@ -185,6 +186,26 @@ describe('AppPressable press feedback', () => {
 
       act(() => {
         readHandler<[unknown]>(host, 'onResponderRelease')(touchEvent());
+        jest.runOnlyPendingTimers();
+      });
+
+      expect(transformOf(host)).toEqual([{ scale: 1 }]);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('does not shrink when the caller says the control is its own feedback', () => {
+    // A switch whose knob travels, or a checkbox that fills, already answers the touch.
+    // Scaling the thing underneath is a second event for one action.
+    jest.useFakeTimers();
+
+    try {
+      const host = renderPressable(jest.fn(), { hasPressFeedback: false });
+
+      act(() => {
+        readHandler<[unknown]>(host, 'onStartShouldSetResponder')(touchEvent());
+        readHandler<[unknown]>(host, 'onResponderGrant')(touchEvent());
         jest.runOnlyPendingTimers();
       });
 
