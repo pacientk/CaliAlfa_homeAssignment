@@ -6,21 +6,21 @@
 | ------------ | ----------------------------------- |
 | Parent epic  | [SPEC-001: Focus & Flow](./epic.md) |
 | Tasks source | [tasks.md](./tasks.md)              |
-| Status       | `not-started`                       |
+| Status       | `completed`                         |
 | Created      | 2026-09-01                          |
 | Last updated | 2026-09-01                          |
 
 ### Execution preferences
 
-| Field               | Value                                                    |
-| ------------------- | -------------------------------------------------------- |
-| Engine              | `task-tool`                                              |
-| Stop mode           | `per-wave` — confirmed with the author at Wave 1 kickoff |
-| Concurrency cap     | 3                                                        |
-| Review enabled      | `true`                                                   |
-| Review pattern      | `spot-check`                                             |
-| Review fail action  | `revise`                                                 |
-| Compliance critical | `false`                                                  |
+| Field               | Value                                                                                   |
+| ------------------- | --------------------------------------------------------------------------------------- |
+| Engine              | `task-tool`                                                                             |
+| Stop mode           | `auto` — confirmed with the author at Wave 1 kickoff; waves ran through without pausing |
+| Concurrency cap     | 3                                                                                       |
+| Review enabled      | `true`                                                                                  |
+| Review pattern      | `spot-check`                                                                            |
+| Review fail action  | `revise`                                                                                |
+| Compliance critical | `false`                                                                                 |
 
 `spot-check` rather than `adversarial` is a deliberate trade against a hard deadline. In
 practice it reviews most of the spec anyway: the four `Risk: high` tasks are reviewed by rule,
@@ -213,6 +213,20 @@ with a §26 row, and the affected tasks are regenerated before anything else run
 
 Written by the orchestrator only.
 
-| Task | Wave | Agent | Started | Completed | Status      | Notes                                |
-| ---- | ---- | ----- | ------- | --------- | ----------- | ------------------------------------ |
-| —    | —    | —     | —       | —         | not-started | Plan created; awaiting epic approval |
+| Task  | Wave | Agent        | Started          | Completed | Status    | Notes                                                                                               |
+| ----- | ---- | ------------ | ---------------- | --------- | --------- | --------------------------------------------------------------------------------------------------- |
+| —     | —    | —            | 2026-09-01 19:50 | —         | —         | Epic approved; stop mode `auto`; concurrency cap 3                                                  |
+| T-001 | 1    | A            | 19:50            | 21:15     | completed | Token layer; Inter registration verified inside the simulator runtime                               |
+| T-004 | 1    | B            | 19:50            | 20:35     | completed | Entity and API client; the expiry contract corrected after a live probe                             |
+| T-002 | 2    | A            | 21:20            | 22:05     | completed | Atom layer; the boundary rule verified in both directions                                           |
+| T-005 | 2    | B            | 21:20            | 21:55     | completed | Offline queue; 23 mutations, one real defect found and fixed                                        |
+| T-010 | 2    | C            | 21:20            | 21:30     | completed | Title validation; 9 mutations                                                                       |
+| T-003 | 3    | A            | 22:10            | 22:50     | completed | Shell; found the boundary rule and the Metro resolver both inert                                    |
+| T-006 | 3    | B            | 22:10            | 22:45     | completed | React bindings; residual sync race recorded as FW-04                                                |
+| T-007 | 4    | A            | 22:55            | 23:15     | completed | Firebase auth; the reCAPTCHA fallback resolved under `__DEV__`                                      |
+| T-009 | 4    | B            | 22:55            | 23:20     | completed | Task list; 17 mutations, one survived and was closed                                                |
+| T-008 | 5    | A            | 23:20            | 00:35     | completed | Auth screens; found the zero-opacity hit-test defect                                                |
+| T-011 | 5    | B            | 23:20            | 00:45     | completed | Form screens; two device-only defects found                                                         |
+| T-012 | 5    | C            | 23:20            | 00:10     | completed | Calendar and settings; the back action wired by the orchestrator                                    |
+| MMKV  | —    | orchestrator | 23:00            | 23:10     | completed | v2 could not run under the bridgeless runtime; moved to v3                                          |
+| T-013 | 6    | A            | 01:25            | 04:05     | completed | README, readiness notes, the §18.4 walkthrough, a clean-clone run and a Maestro flow; filed BUG-001 |

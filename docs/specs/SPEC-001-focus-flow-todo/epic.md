@@ -6,12 +6,12 @@
 | -------------- | ------------------------------------------------------- |
 | Spec ID        | SPEC-001                                                |
 | Title          | Focus & Flow — offline-first to-do application          |
-| Status         | `in-review`                                             |
+| Status         | `done`                                                  |
 | Brownfield     | no — greenfield project, scaffolded in the same session |
 | Version        | 0.1                                                     |
 | Owner          | Kirill Ter                                              |
 | Created        | 2026-09-01                                              |
-| Last updated   | 2026-09-01                                              |
+| Last updated   | 2026-09-02                                              |
 | Target release | 2026-09-02, 16:00 IDT                                   |
 | Related specs  | —                                                       |
 
