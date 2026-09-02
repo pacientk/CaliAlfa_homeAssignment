@@ -8,7 +8,7 @@
 | Title          | Focus & Flow — offline-first to-do application          |
 | Status         | `done`                                                  |
 | Brownfield     | no — greenfield project, scaffolded in the same session |
-| Version        | 0.1                                                     |
+| Version        | 0.2                                                     |
 | Owner          | Kirill Ter                                              |
 | Created        | 2026-09-01                                              |
 | Last updated   | 2026-09-02                                              |
@@ -136,10 +136,20 @@ banner disappears and both changes are on the server.
   its checkbox is disabled, but the three-dot menu still offers Edit and Delete. If she had
   completed it before it expired, it keeps its completed styling.
 - **Scenario D — deletion the user did not mean.** She opens the row menu and taps Delete.
-  A confirmation modal names the task. Cancelling leaves everything untouched.
-- **Scenario E — the write fails permanently.** A queued update comes back 404 because the
-  task was removed on the server. The optimistic change rolls back, the queue entry is
-  discarded rather than retried forever, and the user is told once.
+  A confirmation sheet names the task. Cancelling leaves everything untouched.
+- **Scenario E — the write fails permanently.** A queued update is refused by the server.
+  The optimistic change rolls back, the queue entry is discarded rather than retried
+  forever, and the banner says so until a later change gets through — at which point the
+  sentence is no longer true of the most recent thing to have happened, and clears itself.
+
+  A 404 on an update or a delete is the exception: the record is already gone, which is the
+  outcome the user asked for, so the entry and the local copy are dropped in silence.
+
+- **Scenario H — the list cannot be loaded.** The first sync reaches the server and the
+  server refuses it. Connectivity is fine, so no offline banner is due and nothing will
+  re-run the sync on its own; the screen would otherwise show the cached list with no way
+  to tell it apart from a complete one. A sheet says the list could not be loaded, says the
+  tasks on screen are the copy saved on this device, and offers a retry.
 - **Scenario F — cold start with no network.** The app is opened for the first time that
   day in airplane mode. The cached list renders before any request is attempted; the
   offline banner is visible; the session is still valid, so no sign-in is requested.
@@ -174,7 +184,7 @@ banner disappears and both changes are on the server.
 - FR-8 **MUST** — Completion toggles in both directions.
 - FR-9 **MUST** — Each row carries a three-dot button revealing Edit and Delete beneath the
   card. There is no long-press gesture.
-- FR-10 **MUST** — Delete asks for confirmation in a modal naming the task.
+- FR-10 **MUST** — Delete asks for confirmation in a bottom sheet naming the task.
 - FR-11 **MUST** — A task can be edited on its own screen: title, description, category,
   expiry, and completion.
 - FR-12 **MUST** — A task whose expiry has passed is disabled: muted card, disabled
@@ -215,6 +225,16 @@ banner disappears and both changes are on the server.
 - FR-26 **MUST** — The task list header shows a centred "To-do" title with no back button
   and no search icon; the on-screen search field is the only search affordance.
 
+### Error reporting
+
+- FR-27 **MUST** — A first sync that fails without the device being offline is reported in
+  the foreground, with a retry. Nothing else re-runs it: the sync is re-triggered by
+  connectivity changing, and a server that answers and refuses leaves connectivity
+  reporting online.
+- FR-28 **MUST** — A report of a rejected change clears itself once a later change reaches
+  the server. It survives the successes drained in the same pass as the failure, so that a
+  rollback is never left on screen with nothing saying why.
+
 ---
 
 ## 9. UX / Design
@@ -232,7 +252,7 @@ visual comparison. Fifteen artboards cover every screen and state listed below.
 | A3–A5    | Verification code  | empty, filled and valid, error                                                                                                      |
 | B1       | Task list          | default                                                                                                                             |
 | B2       | Task list          | row action menu open                                                                                                                |
-| B3       | Task list          | delete confirmation modal                                                                                                           |
+| B3       | Task list          | delete confirmation sheet                                                                                                           |
 | B4       | Task list          | empty, no tasks                                                                                                                     |
 | B5       | Task list          | empty, no search results                                                                                                            |
 | B6       | New task           | default                                                                                                                             |
@@ -243,6 +263,11 @@ visual comparison. Fifteen artboards cover every screen and state listed below.
 | D        | Component sheet    | task row in default / completed / expired / expired-completed / menu-open, checkbox, chip, buttons, inputs, tab bar, offline banner |
 
 Frame: 402 × 874 pt, safe areas 59 pt top and 34 pt bottom, 20 pt horizontal margin.
+
+Two surfaces have no artboard. The country-prefix picker was drawn in a later round, once the
+phone field's dropdown turned out to have no mobile equivalent. The sheet that reports a failed
+first sync has none at all: it answers a state the design round never posed a question about,
+and it is built from the same sheet chrome as B3 rather than from anything new.
 
 ### 9.2 Primary flow
 
@@ -375,9 +400,11 @@ The queue is the piece worth reviewing, so it is built first and test-driven.
 
 | Doc                                    | Why                                                                                | Updated |
 | -------------------------------------- | ---------------------------------------------------------------------------------- | ------- |
-| `README.md`                            | The reviewer's entry point: how to run, the decisions taken, the known limitations | [ ]     |
-| `docs/architecture/PROJECT-PROFILE.md` | Already carries the stack; update if any choice above changes during execution     | [ ]     |
-| `docs/prod-readiness.md`               | The Firebase console items no agent can perform                                    | [ ]     |
+| `README.md`                            | The reviewer's entry point: how to run, the decisions taken, the known limitations | [x]     |
+| `docs/architecture/PROJECT-PROFILE.md` | Already carries the stack; update if any choice above changes during execution     | [x]     |
+| `docs/prod-readiness.md`               | The Firebase console items no agent can perform                                    | [x]     |
+| `docs/future-work.md`                  | Deferred work that is not a defect — FW-01 to FW-07                                | [x]     |
+| `docs/bugs/`                           | Defects found and deliberately left open — BUG-001, BUG-002                        | [x]     |
 
 ---
 
@@ -558,6 +585,18 @@ exercised against recorded shapes; the queue is exercised against a fake transpo
 - [ ] A task with an expiry in the past renders disabled and can still be edited
 - [ ] Each empty state
 - [ ] Sign out returns to the welcome screen
+- [ ] Rename the `tasks` resource in the mockapi dashboard, reopen the app: the sheet
+      reports the list could not be loaded and the cached list is still on screen behind it
+- [ ] With the resource still renamed, add a task: it is rolled back and the banner reports
+      the rejection
+- [ ] Restore the resource name and add a task: it reaches the server and the rejection
+      banner clears itself
+
+The mockapi dashboard is the lever for the two failure paths because it breaks the server
+without touching the app — no rebuild, no reload, and the engine is never recreated, so the
+state under test is the real one. Editing `API_BASE_URL` to a missing path is the same test
+without a dashboard, at the cost of a reload. Neither can be reached by turning the network
+off: that is the offline path, which is retried rather than reported.
 
 ### 18.5 Verification rigour gate
 
@@ -588,8 +627,8 @@ repository and a running simulator build.
 - **AC-4** — **Given** a task with an expiry in the past, **When** the list renders,
   **Then** the card is muted and the checkbox is disabled while Edit and Delete stay
   active; and a task completed before expiry still renders as completed. _(FR-12)_
-- **AC-5** — **Given** the row menu, **When** Delete is tapped, **Then** a modal names the
-  task, and cancelling changes nothing. _(FR-9, FR-10)_
+- **AC-5** — **Given** the row menu, **When** Delete is tapped, **Then** a bottom sheet
+  names the task, and cancelling changes nothing. _(FR-9, FR-10)_
 - **AC-6** — **Given** no network, **When** the user creates and edits tasks and restarts
   the app, **Then** the changes are still present and the offline indicator is visible;
   **and When** the network returns, **Then** both changes appear on the server, verified by
@@ -603,6 +642,12 @@ repository and a running simulator build.
   centred "To-do" with no back button and no search icon. _(FR-26)_
 - **AC-10** — **Given** the Settings tab, **When** sign-out is tapped, **Then** the user
   returns to the welcome screen and a relaunch does not restore the session. _(FR-3)_
+- **AC-11** — **Given** a reachable server that refuses the first sync, **When** the app
+  opens, **Then** a sheet reports that the list could not be loaded and offers a retry that
+  re-runs the sync. _(FR-27)_
+- **AC-12** — **Given** a change the server rejected and its report on screen, **When** a
+  later change reaches the server, **Then** the report clears; **and Given** a rejected
+  change and a good one drained in one pass, **Then** the report survives. _(FR-28)_
 
 ---
 
@@ -623,11 +668,11 @@ repository and a running simulator build.
 
 ## 22. Open questions
 
-| #   | Question                                                                       | Status   | Resolution                                                                         |
-| --- | ------------------------------------------------------------------------------ | -------- | ---------------------------------------------------------------------------------- |
-| Q1  | Every requirement question raised during clarification                         | answered | Recorded in `Tech Assignment/REQUIREMENTS.md` §15; all ten closed                  |
-| Q2  | Does the design's momentum card count expired tasks?                           | answered | Yes — expired tasks count towards both numbers                                     |
-| Q3  | Does a failed queue entry need user-visible reporting beyond a single message? | open     | Decide during T-006; the fallback is one non-blocking message and a silent discard |
+| #   | Question                                                                       | Status   | Resolution                                                                                                                                                              |
+| --- | ------------------------------------------------------------------------------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Q1  | Every requirement question raised during clarification                         | answered | Recorded in `Tech Assignment/REQUIREMENTS.md` §15; all ten closed                                                                                                       |
+| Q2  | Does the design's momentum card count expired tasks?                           | answered | Yes — expired tasks count towards both numbers                                                                                                                          |
+| Q3  | Does a failed queue entry need user-visible reporting beyond a single message? | answered | Yes. The fallback shipped and was wrong in both directions: the message had no way to clear, and the read path had no message at all. Closed by FR-27 and FR-28 in v0.2 |
 
 ---
 
@@ -673,6 +718,7 @@ survives the airplane-mode walkthrough in §18.4; the screens match the artboard
 
 ## 26. Change log
 
-| Date       | Version | What changed  | Tasks invalidated | Reason | Approved by |
-| ---------- | ------- | ------------- | ----------------- | ------ | ----------- |
-| 2026-09-01 | 0.1     | initial draft | —                 | —      | —           |
+| Date       | Version | What changed                                                                                                                                                                                                                                                                                                                                                                                       | Tasks invalidated                                                                          | Reason                                                                                                                                                              | Approved by |
+| ---------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| 2026-09-01 | 0.1     | initial draft                                                                                                                                                                                                                                                                                                                                                                                      | —                                                                                          | —                                                                                                                                                                   | —           |
+| 2026-09-02 | 0.2     | Modals became bottom sheets (FR-10, §7.3 D, §9.1 B3, AC-5). Added FR-27 and FR-28 with AC-11 and AC-12: a first sync the server refuses is reported with a retry, and a rejected-change report clears itself. Amended §7.3 E, which claimed the user is told "once" — nothing cleared the report, so it was told for the rest of the session. Added §7.3 H and the §18.4 steps that exercise both. | none — all tasks were `done`; the work landed as post-delivery fixes on their own branches | Two gaps found by reading the code after delivery: a failed read was silent, and a failed write was reported forever. Both contradicted what §7.3 already promised. | Kirill Ter  |
