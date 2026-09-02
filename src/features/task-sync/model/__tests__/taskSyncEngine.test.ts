@@ -145,6 +145,7 @@ const createFakeTransport = (): FakeTransport => {
 interface ScheduledTimer {
   delayMs: number;
   run: () => void;
+  isCancelled: boolean;
 }
 
 interface Harness {
@@ -173,7 +174,11 @@ const setup = (storage: KeyValueStorage = createMemoryStorage()): Harness => {
       return `gen-${idCount}`;
     },
     scheduleTimer: (delayMs, run) => {
-      timers.push({ delayMs, run });
+      const timer: ScheduledTimer = { delayMs, run, isCancelled: false };
+      timers.push(timer);
+      return () => {
+        timer.isCancelled = true;
+      };
     },
   });
 
@@ -830,5 +835,75 @@ describe('what the snapshot tells the banner while the device is offline', () =>
 
     expect(harness.transport.calls).toHaveLength(1);
     expect(harness.engine.getSnapshot().isOnline).toBe(false);
+  });
+});
+
+/**
+ * `dispose` used to clear the listeners and the connectivity subscription and leave the backoff
+ * running. A retry scheduled before disposal would fire up to a minute later and write the queue
+ * and the cache back to storage from an engine nobody was listening to — a disposal that
+ * disposed of nothing.
+ */
+describe('disposing the engine', () => {
+  const arrangePendingRetry = async (): Promise<Harness> => {
+    const harness = setup();
+    harness.engine.enqueueCreate(draftOf());
+    harness.transport.script('create', {
+      error: new ApiError({ kind: 'transport', cause: new Error('socket') }),
+    });
+    await harness.engine.drain();
+    return harness;
+  };
+
+  it('never leaves two backoffs waiting at once', async () => {
+    const harness = setup();
+    harness.engine.enqueueCreate(draftOf());
+    harness.transport.script(
+      'create',
+      { error: new ApiError({ kind: 'transport', cause: new Error('first') }) },
+      { error: new ApiError({ kind: 'transport', cause: new Error('second') }) },
+    );
+
+    await harness.engine.drain();
+    // Connectivity waking the queue while the first backoff is still pending. Without the
+    // cancellation the earlier timer would survive and fire into a queue it no longer describes.
+    await harness.engine.drain();
+
+    expect(harness.timers).toHaveLength(2);
+    expect(harness.timers.filter(timer => !timer.isCancelled)).toHaveLength(1);
+  });
+
+  it('calls off a backoff that was still waiting', async () => {
+    const harness = await arrangePendingRetry();
+    expect(harness.timers).toHaveLength(1);
+    expect(harness.timers[0]?.isCancelled).toBe(false);
+
+    harness.engine.dispose();
+
+    expect(harness.timers[0]?.isCancelled).toBe(true);
+  });
+
+  it('sends nothing when a retry fires anyway, which a cancelled timer still can', async () => {
+    const harness = await arrangePendingRetry();
+    const callsBefore = harness.transport.calls.length;
+    harness.engine.dispose();
+
+    // A timer that had already fired when `dispose` ran cannot be taken back by clearTimeout,
+    // so the engine has to refuse the work rather than rely on the cancellation alone.
+    harness.timers[0]?.run();
+    await Promise.resolve();
+
+    expect(harness.transport.calls).toHaveLength(callsBefore);
+  });
+
+  it('leaves the stored queue exactly as it was', async () => {
+    const harness = await arrangePendingRetry();
+    const storedBefore = JSON.stringify(readMutationQueue(harness.storage));
+    harness.engine.dispose();
+
+    harness.timers[0]?.run();
+    await Promise.resolve();
+
+    expect(JSON.stringify(readMutationQueue(harness.storage))).toBe(storedBefore);
   });
 });

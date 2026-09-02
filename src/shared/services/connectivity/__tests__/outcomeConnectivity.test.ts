@@ -8,6 +8,7 @@ const PROBE_DELAY_MS = 5_000;
 interface ScheduledTimer {
   delayMs: number;
   run: () => void;
+  isCancelled: boolean;
 }
 
 const createTimerLog = (): { timers: ScheduledTimer[]; scheduleTimer: ScheduleTimer } => {
@@ -15,7 +16,11 @@ const createTimerLog = (): { timers: ScheduledTimer[]; scheduleTimer: ScheduleTi
   return {
     timers,
     scheduleTimer: (delayMs, run) => {
-      timers.push({ delayMs, run });
+      const timer: ScheduledTimer = { delayMs, run, isCancelled: false };
+      timers.push(timer);
+      return () => {
+        timer.isCancelled = true;
+      };
     },
   };
 };

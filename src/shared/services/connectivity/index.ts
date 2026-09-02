@@ -5,5 +5,5 @@ export type {
 } from './ConnectivitySource';
 export type { OutcomeConnectivityOptions } from './outcomeConnectivity';
 export { createOutcomeConnectivity, OFFLINE_PROBE_DELAY_MS } from './outcomeConnectivity';
-export type { ScheduleTimer } from './ScheduleTimer';
+export type { CancelTimer, ScheduleTimer } from './ScheduleTimer';
 export { scheduleWithTimeout } from './ScheduleTimer';

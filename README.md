@@ -53,7 +53,7 @@ take several minutes; everything after is incremental. Then sign in with your te
 ```bash
 npx tsc --noEmit              # exits 0
 npm run lint                  # 0 errors, 0 warnings
-npm test                      # 749 tests across 65 suites
+npm test                      # 753 tests across 65 suites
 ```
 
 `npm run lint` prints several `[boundaries][warning]` lines first. Those are deprecation notices
@@ -202,7 +202,7 @@ contains none; it is enforced by whoever reads the diff.
 
 ## Testing
 
-749 tests across 65 suites, over the two places a defect stays invisible until it corrupts data —
+753 tests across 65 suites, over the two places a defect stays invisible until it corrupts data —
 title validation and the mutation queue — plus RNTL component tests over the row states, the
 empty states, and validation feedback. No test touches the live service.
 
