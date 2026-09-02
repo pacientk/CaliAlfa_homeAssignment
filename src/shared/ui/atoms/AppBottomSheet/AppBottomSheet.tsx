@@ -114,13 +114,8 @@ export const AppBottomSheet = ({
             <AppView style={styles.grabber} />
           </AppView>
 
-          <AppView style={[styles.header, isConfirmation ? styles.headerLoud : undefined]}>
-            <AppText
-              variant={isConfirmation ? 'title' : 'label'}
-              color={isConfirmation ? 'primary' : 'secondary'}
-              style={styles.title}
-              accessibilityRole="header"
-            >
+          <AppView style={styles.header}>
+            <AppText variant="cardTitle" style={styles.title} accessibilityRole="header">
               {title}
             </AppText>
 

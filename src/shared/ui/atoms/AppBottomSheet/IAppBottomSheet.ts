@@ -1,16 +1,18 @@
 import type { ReactNode } from 'react';
 
 /**
- * What kind of question the sheet is asking. One prop rather than three switches, because
- * the three behaviours it decides are not independent — they are one intent seen from three
- * angles, and a caller that could mix them (a destructive question with a close button, say)
- * could only get it wrong.
+ * What kind of question the sheet is asking. One prop rather than two switches, because the
+ * behaviours it decides are not independent — they are one intent seen from two angles, and a
+ * caller able to mix them (a destructive question with a close button, say) could only get it
+ * wrong.
  *
- * - `picker` — offers a choice. Quiet header, a close button, and a scrim that dismisses,
- *   because a stray tap is a fair way to decline a choice.
- * - `confirmation` — asks a question with a cost. Full-size heading, no close button, and an
- *   inert scrim, because a stray tap on the backdrop is not an answer to "delete this
- *   permanently?".
+ * - `picker` — offers a choice. A close button and a scrim that dismisses, because a stray tap
+ *   is a fair way to decline a choice.
+ * - `confirmation` — asks a question with a cost. Neither, because a stray tap on the backdrop
+ *   is not an answer to "delete this permanently?".
+ *
+ * The header looks the same either way. Sizing it by variant made the two sheets read as two
+ * components; the difference that matters is what it costs to leave, not how loud the title is.
  */
 export type BottomSheetVariant = 'picker' | 'confirmation';
 

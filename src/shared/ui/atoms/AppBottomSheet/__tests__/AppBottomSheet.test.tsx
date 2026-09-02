@@ -66,23 +66,18 @@ describe('the bottom sheet', () => {
     expect(onRequestClose).not.toHaveBeenCalled();
   });
 
-  it('gives a destructive question the display face', async () => {
-    await renderSheet({ onRequestClose: jest.fn(), variant: 'confirmation' });
+  it.each<BottomSheetVariant>(['picker', 'confirmation'])(
+    'draws the %s header at the one size every sheet uses',
+    async variant => {
+      // Sizing the header by variant made the two sheets read as two components. The
+      // difference that matters is what it costs to leave, not how loud the title is.
+      await renderSheet({ onRequestClose: jest.fn(), variant });
 
-    expect(screen.getByRole('header', { name: 'Country code' })).toHaveStyle({
-      fontSize: lightTheme.typography.title.fontSize,
-    });
-  });
-
-  it('keeps a picker heading quiet — the paired half of the rule above', async () => {
-    // A picker's header is a caption for a list. Giving it the same weight as a destructive
-    // question would flatten the only difference between the two shapes.
-    await renderSheet({ onRequestClose: jest.fn() });
-
-    expect(screen.getByRole('header', { name: 'Country code' })).toHaveStyle({
-      fontSize: lightTheme.typography.label.fontSize,
-    });
-  });
+      expect(screen.getByRole('header', { name: 'Country code' })).toHaveStyle({
+        fontSize: lightTheme.typography.cardTitle.fontSize,
+      });
+    },
+  );
 
   it('does not close on its own', async () => {
     const onRequestClose = jest.fn();

@@ -10,7 +10,6 @@ export interface AppBottomSheetStyles {
   readonly grabberBand: ViewStyle;
   readonly grabber: ViewStyle;
   readonly header: ViewStyle;
-  readonly headerLoud: ViewStyle;
   readonly title: TextStyle;
   readonly close: ViewStyle;
   readonly divider: ViewStyle;
@@ -39,6 +38,9 @@ export const makeAppBottomSheetStyles = (theme: Theme): AppBottomSheetStyles => 
   },
   scrim: {
     flex: 1,
+    justifyContent: 'center',
+    alignContent: 'center',
+    alignItems: 'center',
   },
   sheetLayer: {
     ...StyleSheet.absoluteFillObject,
@@ -62,18 +64,16 @@ export const makeAppBottomSheetStyles = (theme: Theme): AppBottomSheetStyles => 
     borderRadius: theme.borderRadius.full,
     backgroundColor: theme.colors.surface.dim,
   },
+  // One header for every sheet, at the 20/28 card-title size. A picker's caption was too
+  // quiet to be a heading and a confirmation's display face was too loud for a strip this
+  // tall; the size in between is a heading in both.
   header: {
     minHeight: theme.sizes.size52,
+    paddingVertical: theme.spacing.space8,
     flexDirection: 'row',
     alignItems: 'center',
     paddingLeft: theme.spacing.space20,
     paddingRight: theme.spacing.space16,
-  },
-  // A confirmation's heading is full-size type, so the header grows to hold it and gains the
-  // breathing room a 52 pt strip cannot give a 32 pt line.
-  headerLoud: {
-    paddingTop: theme.spacing.space8,
-    paddingBottom: theme.spacing.space12,
   },
   title: {
     flex: 1,
