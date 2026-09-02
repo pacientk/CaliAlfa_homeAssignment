@@ -15,6 +15,12 @@ export interface IUseMeasuredHeight {
  * instead of assuming the token. The task list's sync banner is the case that needed it: it
  * hangs from the bottom of the header, and a hard 52 would have it overlapping the title the
  * moment someone turns their text size up.
+ *
+ * A caller positioning an absolute overlay against a measured element needs one thing more:
+ * the parent's own top inset, added back by hand. React Native places an absolutely
+ * positioned child against its parent's *border* box rather than its padding box, so a
+ * screen's safe-area padding does not shift it — without that term the task list's banner
+ * lands 52 pt from the physical top of the display, inside the status bar and over the title.
  */
 export const useMeasuredHeight = (): IUseMeasuredHeight => {
   const [height, setHeight] = useState(0);
