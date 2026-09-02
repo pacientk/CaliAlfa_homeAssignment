@@ -82,7 +82,7 @@ maestro test .maestro/task-lifecycle.yaml
 ```
 
 It signs in if the session is not already restored, rejects a duplicate title, creates a task,
-deletes it through the confirmation modal, and leaves the shared API exactly as it found it. It
+deletes it through the confirmation sheet, and leaves the shared API exactly as it found it. It
 deliberately stops short of the offline cycle: Maestro can drive the taps but cannot assert what
 reached the server, and that assertion is the whole point of the offline claim.
 
