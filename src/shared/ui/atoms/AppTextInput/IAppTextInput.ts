@@ -22,6 +22,18 @@ export interface IAppTextInputProps {
    * is identical, and a `MultilineTextInput` would have to restate all of them.
    */
   readonly isMultiline?: boolean;
+  /**
+   * Drops the field's own frame — border, fill and horizontal padding — so it can sit inside
+   * a composite control whose container draws the frame instead. The phone field is the case
+   * it exists for: the canvas draws one bordered box holding a country segment, a divider and
+   * the number, and two nested borders is not that.
+   */
+  readonly isSeamless?: boolean;
+  /**
+   * Reports focus outward. Only a seamless field needs it, and it needs it for one reason:
+   * the container that owns the frame is the one that has to draw the focus ring.
+   */
+  readonly onFocusChange?: (isFocused: boolean) => void;
   readonly keyboardType?: KeyboardTypeOptions;
   readonly maxLength?: number;
   /** The wrapper around label, field, and message — for layout, never for the field's own look. */

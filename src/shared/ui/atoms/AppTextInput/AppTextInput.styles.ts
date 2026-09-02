@@ -7,6 +7,7 @@ export interface AppTextInputStyles {
   readonly label: TextStyle;
   readonly field: TextStyle;
   readonly fieldMultiline: TextStyle;
+  readonly fieldSeamless: TextStyle;
   readonly fieldResting: TextStyle;
   readonly fieldFocused: TextStyle;
   readonly fieldError: TextStyle;
@@ -56,6 +57,13 @@ export const makeAppTextInputStyles = (theme: Theme): AppTextInputStyles =>
     fieldMultiline: {
       minHeight: theme.sizes.size96,
       paddingVertical: theme.spacing.space14,
+    },
+    // No frame of its own: the composite that wraps it owns the border, the fill and the
+    // horizontal inset, so the field contributes only its type and its colour.
+    fieldSeamless: {
+      backgroundColor: 'transparent',
+      borderWidth: 0,
+      paddingHorizontal: 0,
     },
     fieldResting: {
       backgroundColor: theme.colors.surface.lowest,

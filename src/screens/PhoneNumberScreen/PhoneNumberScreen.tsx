@@ -1,13 +1,17 @@
+import type { CountryPrefix } from '@features/auth';
 import {
   authFailureMessage,
   AuthPrimaryButton,
   AuthTopBar,
-  isPlausiblePhoneNumber,
-  sanitisePhoneInput,
+  composeE164,
+  DEFAULT_COUNTRY_PREFIX,
+  isPlausibleNumberParts,
+  PhoneNumberField,
+  sanitiseNationalNumber,
   useSendVerificationCode,
 } from '@features/auth';
 import { strings } from '@lib/strings';
-import { AppIcon, AppScrollView, AppText, AppTextInput, AppView } from '@ui/atoms';
+import { AppIcon, AppScrollView, AppText, AppView } from '@ui/atoms';
 import { useThemedStyles } from '@ui/tokens';
 import type { JSX } from 'react';
 import { useState } from 'react';
@@ -19,10 +23,14 @@ import { makePhoneNumberScreenStyles } from './PhoneNumberScreen.styles';
 /**
  * Artboard A2.
  *
- * One field holds the country code and the national number together, as T-008's scope
- * specifies, rather than the canvas's two-part control: a prefix segment is a country picker,
- * and a country picker is a screen this app does not have. The leading `+` in the placeholder
- * is what carries that requirement to the user.
+ * The field is the canvas's two-part control: a country segment and the national number in
+ * one frame. The segment opens a modal rather than a dropdown, because iOS has no dropdown —
+ * the chevron the canvas draws is what says the segment is choosable, and a presented sheet
+ * is what the platform opens when it is pressed.
+ *
+ * Holding the country as a value rather than parsing it back out of the typed string is what
+ * lets the composed number always be well formed, and is why the screen no longer has to
+ * insist the user type the leading plus themselves.
  *
  * The button is gated on plausibility, never on validity. `lib/phoneNumber.ts` says why: the
  * provider is the authority on whether a number can receive an SMS, and a local rule that
@@ -31,17 +39,18 @@ import { makePhoneNumberScreenStyles } from './PhoneNumberScreen.styles';
 export const PhoneNumberScreen = ({ onBack, onCodeSent }: IPhoneNumberScreenProps): JSX.Element => {
   const styles = useThemedStyles(makePhoneNumberScreenStyles);
   const insets = useSafeAreaInsets();
-  const [enteredNumber, setEnteredNumber] = useState('');
+  const [prefix, setPrefix] = useState<CountryPrefix>(DEFAULT_COUNTRY_PREFIX);
+  const [nationalNumber, setNationalNumber] = useState('');
   const { send, failure, isSending } = useSendVerificationCode();
 
-  const canSubmit = isPlausiblePhoneNumber(enteredNumber) && !isSending;
+  const canSubmit = isPlausibleNumberParts(prefix.dialCode, nationalNumber) && !isSending;
 
   const changeNumber = (next: string): void => {
-    setEnteredNumber(sanitisePhoneInput(next));
+    setNationalNumber(sanitiseNationalNumber(next));
   };
 
   const requestCode = (): void => {
-    void send(enteredNumber).then(didSend => {
+    void send(composeE164(prefix.dialCode, nationalNumber)).then(didSend => {
       if (didSend) {
         onCodeSent();
       }
@@ -65,13 +74,13 @@ export const PhoneNumberScreen = ({ onBack, onCodeSent }: IPhoneNumberScreenProp
           {strings.phoneNumber.subtitle}
         </AppText>
 
-        <AppTextInput
-          value={enteredNumber}
-          onChangeText={changeNumber}
+        <PhoneNumberField
+          prefix={prefix}
+          onPrefixChange={setPrefix}
+          nationalNumber={nationalNumber}
+          onNationalNumberChange={changeNumber}
           label={strings.phoneNumber.fieldLabel}
-          accessibilityLabel={strings.phoneNumber.fieldAccessibilityLabel}
           placeholder={strings.phoneNumber.fieldPlaceholder}
-          keyboardType="phone-pad"
           errorMessage={failure === undefined ? undefined : authFailureMessage(failure)}
           style={styles.field}
           testID="phoneNumber.field"

@@ -49,6 +49,8 @@ export const AppTextInput = ({
   errorMessage,
   isDisabled = false,
   isMultiline = false,
+  isSeamless = false,
+  onFocusChange,
   keyboardType,
   maxLength,
   style,
@@ -59,7 +61,14 @@ export const AppTextInput = ({
   const [isFocused, setIsFocused] = useState(false);
 
   const hasError = errorMessage !== undefined && errorMessage.length > 0;
-  const fieldState = resolveFieldState(styles, isDisabled, hasError, isFocused);
+  const fieldState = isSeamless
+    ? styles.fieldSeamless
+    : resolveFieldState(styles, isDisabled, hasError, isFocused);
+
+  const reportFocus = (isNextFocused: boolean): void => {
+    setIsFocused(isNextFocused);
+    onFocusChange?.(isNextFocused);
+  };
 
   return (
     <AppView style={[styles.container, style]}>
@@ -71,8 +80,8 @@ export const AppTextInput = ({
       <TextInput
         value={value}
         onChangeText={onChangeText}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
+        onFocus={() => reportFocus(true)}
+        onBlur={() => reportFocus(false)}
         editable={!isDisabled}
         multiline={isMultiline}
         placeholder={placeholder}
