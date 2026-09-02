@@ -14,9 +14,9 @@ import { strings } from '@lib/strings';
 import type { ListRenderItemInfo } from '@shopify/flash-list';
 import { AppFlashList, AppText, AppView } from '@ui/atoms';
 import { useThemedStyles } from '@ui/tokens';
-import { EmptyState } from '@widgets/EmptyState';
 import { ProTipCard } from '@widgets/ProTipCard';
 import { SyncBanner } from '@widgets/SyncBanner';
+import { TaskListEmpty } from '@widgets/TaskListEmpty';
 import { TaskListHeader } from '@widgets/TaskListHeader';
 import type { JSX } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -40,13 +40,8 @@ const keyExtractor = (task: CachedTask): string => task.id;
 export const TaskListScreen = ({ onCreateTask, onOpenTask }: ITaskListScreenProps): JSX.Element => {
   const styles = useThemedStyles(makeTaskListScreenStyles);
   const insets = useSafeAreaInsets();
-  // The banner hangs from the bottom of the header, whose height is a minimum that grows with
-  // the OS text size, so it is measured rather than assumed.
-  //
-  // The safe-area inset has to be added back: React Native positions an absolutely placed
-  // child against its parent's *border* box, not its padding box, so the screen's own top
-  // padding does not shift it. Without this the band lands 52 pt from the physical top of the
-  // display — inside the status bar, over the title.
+  // Where the floating sync banner hangs. See `useMeasuredHeight` for why both terms are
+  // needed and neither can be a constant.
   const headerBox = useMeasuredHeight();
   const bannerTop = insets.top + headerBox.height;
 
@@ -138,30 +133,13 @@ export const TaskListScreen = ({ onCreateTask, onOpenTask }: ITaskListScreenProp
         ) : (
           <AppView style={styles.emptyLayout}>
             {header}
-            {hasTasks ? (
-              <EmptyState
-                icon="search_off"
-                tone="neutral"
-                title={strings.taskList.noResults.title(search.settledQuery)}
-                message={strings.taskList.noResults.message(search.hiddenCount)}
-                actionLabel={strings.taskList.search.clear}
-                onAction={search.clearQuery}
-                isCentred={false}
-                testID="taskList.noResults"
-              />
-            ) : (
-              <EmptyState
-                icon="checklist"
-                tone="brand"
-                title={strings.taskList.noTasks.title}
-                message={strings.taskList.noTasks.message}
-                actionLabel={strings.taskList.createTask}
-                actionIcon="add"
-                onAction={onCreateTask}
-                isCentred
-                testID="taskList.noTasks"
-              />
-            )}
+            <TaskListEmpty
+              hasTasks={hasTasks}
+              query={search.settledQuery}
+              hiddenCount={search.hiddenCount}
+              onClearSearch={search.clearQuery}
+              onCreateTask={onCreateTask}
+            />
           </AppView>
         )}
       </AppView>
