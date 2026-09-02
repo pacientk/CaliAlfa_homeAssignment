@@ -1,12 +1,5 @@
 # Future work
 
-> **How to use this file**
->
-> - Copy this template to `docs/future-work.md` the first time any spec, hotfix, or bug report defers something to it.
-> - This is the register for **deferred work that is not a defect**: missing features, polish, ideas surfaced mid-execution, band-aid follow-ups. Defects go to `docs/bugs/BUG-NNN-*.md` instead — the litmus test is whether you can cite the SPEC clause the code violates.
-> - It is a queue, not a graveyard. The next planning round reads this file; an item that nobody picks up for several rounds should be closed as `wont-do` with a reason rather than left to rot.
-> - Delete this block when the file is filled in.
-
 ## Numbering
 
 `FW-NN`, two-digit zero-padded, sequential across the whole project: `max(existing FW-NN) + 1`. First entry is `FW-01`. Numbers are never reused, including for `done` and `wont-do` items — a closed number stays claimed so old references keep resolving.
@@ -24,11 +17,15 @@
 
 Most recent at the bottom. `Source` is where the item came from — a spec, hotfix, or bug — so the context is one click away.
 
-| ID    | Source       | Description                                                   | Proposed track                            | Status |
-| ----- | ------------ | ------------------------------------------------------------- | ----------------------------------------- | ------ |
-| FW-01 | SPEC-NNN §21 | {one line: what is deferred and why it is worth doing later}  | small-spec / full triplet / hotfix / none | open   |
-| FW-02 | HF-NNN §8    | {band-aid follow-up: what the proper fix would be}            | full triplet                              | open   |
-| FW-03 | BUG-NNN      | {coverage gap that could not be closed while the bug is open} | small-spec                                | open   |
+| ID    | Source          | Description                                                    | Proposed track | Status |
+| ----- | --------------- | -------------------------------------------------------------- | -------------- | ------ |
+| FW-01 | SPEC-001, T-001 | Migrate the boundaries ESLint config to the v7 API             | small-spec     | open   |
+| FW-02 | SPEC-001, T-001 | Component dimension tokens                                     | small-spec     | open   |
+| FW-03 | SPEC-001, T-001 | One untokenised text style                                     | none           | open   |
+| FW-04 | SPEC-001, T-006 | Residual sync race: a drain completing mid-page-fetch          | small-spec     | open   |
+| FW-05 | SPEC-001, T-013 | An intermittent LogBox warning toast on launch                 | none           | open   |
+| FW-06 | SPEC-001, T-013 | An automated offline end-to-end test, and the harness it needs | full triplet   | open   |
+| FW-07 | Post-delivery   | A response the app cannot parse is reported as "Offline"       | small-spec     | open   |
 
 ## What does NOT belong here
 

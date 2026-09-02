@@ -1,11 +1,7 @@
-# SPEC-{NNN} — Verification checklist (per task hand-off)
+# SPEC-001 — Verification checklist (per task hand-off)
 
-> **How to use this template**
->
-> - Copy this file to `docs/specs/SPEC-{NNN}-{slug}/verification-checklist.md` when the spec is created.
-> - Sections §0–§9 are the **universal floor** — keep them verbatim. They are project-agnostic and apply to every spec.
-> - Add a new section §10+ **"Project / spec-specific surfaces"** with checklist items for whatever the epic touches that the universal floor does not cover. See examples at the bottom.
-> - Delete the "How to use this template" block when the file is filled in.
+Sections §0–§9 are the universal floor, kept verbatim from the template because they are
+project-agnostic. Anything below them is specific to this spec.
 
 **Read this BEFORE you mark a task `completed` and BEFORE you write the hand-off summary.**
 
