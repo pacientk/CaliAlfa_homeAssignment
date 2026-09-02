@@ -49,12 +49,17 @@ export const makeTaskListScreenStyles = (theme: Theme): TaskListScreenStyles =>
       right: 0,
       alignItems: 'stretch',
     },
+    // Deliberately no horizontal padding. The scroll view has to reach the screen's edges,
+    // because iOS draws the scroll indicator against the inside of its own frame — inset the
+    // frame and the indicator floats over the rows instead of sitting at the edge of the
+    // display. The 20 pt margin therefore lives on the scrolling *content*, below, and on the
+    // empty layout, which is the same margin in a container that does not scroll.
     content: {
       flex: 1,
-      paddingHorizontal: theme.spacing.space20,
       paddingTop: theme.spacing.space8,
     },
     listContent: {
+      paddingHorizontal: theme.spacing.space20,
       paddingBottom: theme.spacing.space56,
     },
     rowSlot: {
@@ -62,6 +67,7 @@ export const makeTaskListScreenStyles = (theme: Theme): TaskListScreenStyles =>
     },
     emptyLayout: {
       flex: 1,
+      paddingHorizontal: theme.spacing.space20,
     },
     newTask: {
       position: 'absolute',
