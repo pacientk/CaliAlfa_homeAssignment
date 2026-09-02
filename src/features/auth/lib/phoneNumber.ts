@@ -59,3 +59,32 @@ export const isPlausiblePhoneNumber = (raw: string): boolean => {
 
   return length >= MIN_E164_DIGITS && length <= MAX_E164_DIGITS;
 };
+
+/**
+ * What the national half of the field is allowed to hold.
+ *
+ * Same rule as `sanitisePhoneInput` minus the plus: the country segment carries the
+ * international prefix now, so a `+` typed into the number can only be a mistake, and one
+ * silently kept there would produce `+972+34…` on the wire.
+ */
+export const sanitiseNationalNumber = (raw: string): string => raw.replace(REJECTED_NATIONAL, '');
+
+/** Digits and the spaces people group them with. Nothing else, and no plus. */
+const REJECTED_NATIONAL = /[^\d ]/g;
+
+/**
+ * The chosen country plus the typed number, in the form the provider is called with.
+ *
+ * This is what makes the picker worth having: the prefix is a fact the field holds rather
+ * than something parsed back out of a string, so the composed value is always well formed
+ * and the screen no longer has to insist the user type the plus themselves.
+ */
+export const composeE164 = (dialCode: string, nationalNumber: string): string =>
+  `${dialCode}${digitsOf(nationalNumber)}`;
+
+/**
+ * Whether the pair is worth sending. It defers to the same plausibility rule as before,
+ * applied to the composed number, so there is one definition of "plausible" and not two.
+ */
+export const isPlausibleNumberParts = (dialCode: string, nationalNumber: string): boolean =>
+  isPlausiblePhoneNumber(composeE164(dialCode, nationalNumber));

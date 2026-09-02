@@ -17,10 +17,12 @@ export const AppView = ({
   style,
   accessibilityLabel,
   accessibilityRole,
+  pointerEvents,
   onLayout,
   testID,
 }: IAppViewProps): JSX.Element => (
   <View
+    pointerEvents={pointerEvents}
     style={style}
     accessibilityLabel={accessibilityLabel}
     accessibilityRole={accessibilityRole}

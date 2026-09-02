@@ -37,7 +37,7 @@ import type { TaskSyncHarness } from '@features/task-sync/testing/taskSyncHarnes
 import { resetSyncStore, setupTaskSync } from '@features/task-sync/testing/taskSyncHarness';
 import { strings } from '@lib/strings';
 import { createMemoryStorage } from '@shared/services/storage';
-import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { lightTheme, ThemeProvider } from '@ui/tokens';
 import type { JSX, ReactNode } from 'react';
 import type * as SafeAreaContext from 'react-native-safe-area-context';
@@ -413,13 +413,34 @@ describe('the sync banner reports connectivity and the queue (AC-7, FR-23)', () 
     expect(screen.queryByTestId('taskList.syncBanner')).toBeNull();
   });
 
-  it('announces the outage while the device is offline', async () => {
+  it('announces the outage while the device is offline, in red on a neutral band', async () => {
     await mountScreen([taskOf('a', 1)], false);
 
     expect(screen.getByTestId('taskList.syncBanner')).toHaveStyle({
-      backgroundColor: lightTheme.colors.surface.containerHighest,
+      backgroundColor: lightTheme.colors.surface.lowest,
     });
-    expect(screen.getByText(strings.syncBanner.offline)).toBeTruthy();
+    expect(screen.getByText(strings.syncBanner.offline)).toHaveStyle({
+      color: lightTheme.colors.text.error,
+    });
+  });
+
+  it('floats over the list rather than pushing it down', async () => {
+    // The banner used to sit in the column, so every row moved the moment the radio blinked
+    // and moved back when it cleared. What is asserted is the property that stops that: the
+    // slot is out of the flow, and the content's own offset does not depend on it.
+    const { harness } = await mountScreen([taskOf('a', 1)], false);
+
+    expect(screen.getByTestId('taskList.bannerSlot')).toHaveStyle({ position: 'absolute' });
+
+    await act(async () => {
+      harness.connectivity.setIsOnline(true);
+      await Promise.resolve();
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('taskList.syncBanner')).toBeNull();
+    });
+    expect(screen.getByTestId('taskList.bannerSlot')).toHaveStyle({ position: 'absolute' });
   });
 
   it('clears once connectivity returns and the queue has drained', async () => {

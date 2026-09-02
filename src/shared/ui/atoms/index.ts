@@ -7,12 +7,12 @@
  * the theme, the font-scale cap, the touch-target floor, and the accessibility defaults are
  * applied once, so a raw `<Text>` elsewhere is a place where all four silently do not happen.
  */
+export type { BottomSheetVariant, IAppBottomSheetProps } from './AppBottomSheet';
+export { AppBottomSheet } from './AppBottomSheet';
 export type { IAppFlashListProps } from './AppFlashList';
 export { AppFlashList } from './AppFlashList';
 export type { IAppIconProps, IconName, IconSize } from './AppIcon';
 export { AppIcon } from './AppIcon';
-export type { IAppModalProps } from './AppModal';
-export { AppModal } from './AppModal';
 export type { IAppPressableProps, PressableRole } from './AppPressable';
 export { AppPressable } from './AppPressable';
 export type { IAppScrollViewProps } from './AppScrollView';

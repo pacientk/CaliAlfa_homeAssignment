@@ -1,5 +1,5 @@
 import { strings } from '@lib/strings';
-import { AppModal, AppPressable, AppText, AppView } from '@ui/atoms';
+import { AppBottomSheet, AppPressable, AppText, AppView } from '@ui/atoms';
 import { useThemedStyles } from '@ui/tokens';
 import type { JSX } from 'react';
 
@@ -22,17 +22,16 @@ export const DeleteTaskDialog = ({
   const styles = useThemedStyles(makeDeleteTaskDialogStyles);
 
   return (
-    <AppModal
+    <AppBottomSheet
       isVisible={isVisible}
       onRequestClose={onCancel}
+      title={strings.taskList.deleteDialog.title}
+      closeLabel={strings.taskList.deleteDialog.cancel}
+      variant="confirmation"
       accessibilityLabel={strings.taskList.deleteDialog.title}
       testID="taskList.deleteDialog"
     >
       <AppView style={styles.card}>
-        <AppText variant="title" accessibilityRole="header">
-          {strings.taskList.deleteDialog.title}
-        </AppText>
-
         <AppText variant="body" color="secondary" style={styles.message}>
           {strings.taskList.deleteDialog.message(taskTitle)}
         </AppText>
@@ -61,6 +60,6 @@ export const DeleteTaskDialog = ({
           </AppPressable>
         </AppView>
       </AppView>
-    </AppModal>
+    </AppBottomSheet>
   );
 };

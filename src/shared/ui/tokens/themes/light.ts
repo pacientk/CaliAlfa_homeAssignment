@@ -51,6 +51,7 @@ export const lightTheme: Theme = {
       onPrimaryContainer: Palette.purple200,
       error: Palette.red500,
       onErrorContainer: Palette.red900,
+      success: Palette.green500,
     },
     border: {
       subtle: Palette.neutral300,

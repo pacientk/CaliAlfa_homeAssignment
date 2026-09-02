@@ -4,6 +4,7 @@ import {
   NewTaskButton,
   summariseTasks,
   useExpiryNow,
+  useMeasuredHeight,
   useTaskRowMenu,
   useTaskSearch,
 } from '@features/task-list';
@@ -39,6 +40,15 @@ const keyExtractor = (task: CachedTask): string => task.id;
 export const TaskListScreen = ({ onCreateTask, onOpenTask }: ITaskListScreenProps): JSX.Element => {
   const styles = useThemedStyles(makeTaskListScreenStyles);
   const insets = useSafeAreaInsets();
+  // The banner hangs from the bottom of the header, whose height is a minimum that grows with
+  // the OS text size, so it is measured rather than assumed.
+  //
+  // The safe-area inset has to be added back: React Native positions an absolutely placed
+  // child against its parent's *border* box, not its padding box, so the screen's own top
+  // padding does not shift it. Without this the band lands 52 pt from the physical top of the
+  // display — inside the status bar, over the title.
+  const headerBox = useMeasuredHeight();
+  const bannerTop = insets.top + headerBox.height;
 
   const tasks = useTasks();
   const toggleTaskDone = useToggleTaskDone();
@@ -102,7 +112,7 @@ export const TaskListScreen = ({ onCreateTask, onOpenTask }: ITaskListScreenProp
 
   return (
     <AppView style={[styles.screen, { paddingTop: insets.top }]}>
-      <AppView style={styles.header}>
+      <AppView style={styles.header} onLayout={headerBox.onLayout}>
         <AppText
           variant="title"
           color="accent"
@@ -112,8 +122,6 @@ export const TaskListScreen = ({ onCreateTask, onOpenTask }: ITaskListScreenProp
           {strings.taskList.title}
         </AppText>
       </AppView>
-
-      <SyncBanner />
 
       <AppView style={styles.content}>
         {hasVisibleTasks ? (
@@ -166,6 +174,14 @@ export const TaskListScreen = ({ onCreateTask, onOpenTask }: ITaskListScreenProp
         onCancel={menu.dismissDelete}
         onConfirm={confirmDelete}
       />
+
+      <AppView
+        style={[styles.bannerSlot, { top: bannerTop }]}
+        pointerEvents="box-none"
+        testID="taskList.bannerSlot"
+      >
+        <SyncBanner />
+      </AppView>
     </AppView>
   );
 };

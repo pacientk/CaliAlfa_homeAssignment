@@ -23,6 +23,11 @@ export interface SyncBannerContent {
  * The wording is chosen here, from a failure *kind*, rather than in `syncStore` — copy
  * belongs in `shared/lib/strings.ts`, and a store that held sentences could not be asserted
  * without asserting English.
+ *
+ * Colour carries the state and the background stays neutral for two of the three: red when
+ * there is no connection, green while changes are on their way. The third keeps the filled
+ * error band, because it is the only state the user may have to act on and a third shade of
+ * text would be a weaker signal than a different surface.
  */
 export const resolveSyncBanner = (
   isOnline: boolean,
@@ -33,7 +38,7 @@ export const resolveSyncBanner = (
     return {
       tone: 'offline',
       icon: 'cloud_off',
-      color: 'secondary',
+      color: 'error',
       message: strings.syncBanner.offline,
     };
   }
@@ -51,7 +56,7 @@ export const resolveSyncBanner = (
     return {
       tone: 'pending',
       icon: 'sync',
-      color: 'accent',
+      color: 'success',
       message: strings.syncBanner.pending(pendingCount),
     };
   }

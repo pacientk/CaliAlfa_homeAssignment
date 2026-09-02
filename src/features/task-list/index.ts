@@ -8,6 +8,8 @@
  */
 export { useDebouncedValue } from './hooks/useDebouncedValue';
 export { useExpiryNow } from './hooks/useExpiryNow';
+export type { IUseMeasuredHeight } from './hooks/useMeasuredHeight';
+export { useMeasuredHeight } from './hooks/useMeasuredHeight';
 export type { IUseTaskRowMenuReturn } from './hooks/useTaskRowMenu';
 export { useTaskRowMenu } from './hooks/useTaskRowMenu';
 export type { IUseTaskSearchReturn } from './hooks/useTaskSearch';

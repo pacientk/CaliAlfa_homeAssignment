@@ -55,6 +55,8 @@ export interface TextColors {
   readonly error: string;
   /** Text on `colors.feedback.errorContainer`. */
   readonly onErrorContainer: string;
+  /** Work that is going well: the sync banner while changes are on their way. */
+  readonly success: string;
 }
 
 export interface BorderColors {
@@ -76,7 +78,7 @@ export interface FeedbackColors {
   readonly error: string;
   readonly errorContainer: string;
   readonly onErrorContainer: string;
-  /** Completion only — a checked checkbox and the completed progress fill. */
+  /** A checked checkbox and the completed progress fill. */
   readonly success: string;
 }
 

@@ -13,6 +13,12 @@ export interface IAppViewProps {
   readonly accessibilityLabel?: string;
   /** Set when the container itself is meaningful — `header`, `alert`, `list`. */
   readonly accessibilityRole?: 'header' | 'alert' | 'list' | 'summary' | 'none';
+  /**
+   * Lets taps through the parts of a view that draw nothing. An absolutely positioned
+   * overlay needs it: without it the strip swallows every touch across its whole box, and a
+   * banner that blocks the list under it is worse than no banner.
+   */
+  readonly pointerEvents?: 'auto' | 'none' | 'box-none' | 'box-only';
   readonly onLayout?: (event: LayoutChangeEvent) => void;
   readonly testID?: string;
 }

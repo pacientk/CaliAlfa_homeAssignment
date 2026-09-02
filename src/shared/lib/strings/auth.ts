@@ -49,9 +49,15 @@ export const phoneNumber = {
    * the placeholder carries the shape the field expects — including the leading `+`, which is
    * what makes "these digits are a country code" unambiguous without a country picker.
    */
-  fieldPlaceholder: '+34 666 55 44 33',
+  fieldPlaceholder: '666 55 44 33',
+  /** The country segment of the field, and the sheet it opens. */
+  prefixAccessibilityLabel: 'Country code',
+  prefixSheet: {
+    title: 'Country code',
+    close: 'Close the country list',
+  },
   /** Not drawn: the visible label is two words, and a screen reader needs the whole rule. */
-  fieldAccessibilityLabel: 'Phone number, with its country code',
+  fieldAccessibilityLabel: 'Phone number, without the country code',
   reassurance: 'Standard rates may apply. Your number is used only to sign you in.',
   submit: 'Next',
 } as const;

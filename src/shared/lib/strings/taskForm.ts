@@ -75,6 +75,7 @@ export const taskForm = {
       inAWeek: 'In a week',
       never: 'No expiry',
       confirm: 'Done',
+      close: 'Close the expiry picker',
     },
   },
 

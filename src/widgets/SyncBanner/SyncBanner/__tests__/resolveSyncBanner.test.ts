@@ -11,9 +11,17 @@ describe('resolveSyncBanner', () => {
     expect(resolveSyncBanner(false, 0, undefined)).toEqual({
       tone: 'offline',
       icon: 'cloud_off',
-      color: 'secondary',
+      color: 'error',
       message: strings.syncBanner.offline,
     });
+  });
+
+  it('says which state it is in with colour: red with no connection, green while syncing', () => {
+    // The background is neutral behind both, so the text colour is the whole signal. A
+    // failure keeps the filled error band instead — see the third case below.
+    expect(resolveSyncBanner(false, 0, undefined)?.color).toBe('error');
+    expect(resolveSyncBanner(true, 2, undefined)?.color).toBe('success');
+    expect(resolveSyncBanner(true, 0, 'server')?.color).toBe('onErrorContainer');
   });
 
   it('counts the queued changes while they are still draining', () => {

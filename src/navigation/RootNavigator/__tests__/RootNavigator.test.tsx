@@ -27,6 +27,8 @@ jest.mock('react-native-safe-area-context', () => {
   };
 });
 
+/** The default country the picker starts on, plus the national digits typed into the field. */
+const TEST_NATIONAL = '528287009';
 const TEST_PHONE = '+972528287009';
 const TEST_CODE = '123456';
 
@@ -100,7 +102,7 @@ describe('RootNavigator', () => {
     await userEvent.press(screen.getByRole('button', { name: strings.welcome.continue }));
     await userEvent.type(
       screen.getByLabelText(strings.phoneNumber.fieldAccessibilityLabel),
-      TEST_PHONE,
+      TEST_NATIONAL,
     );
     await userEvent.press(screen.getByRole('button', { name: strings.phoneNumber.submit }));
 

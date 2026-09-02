@@ -29,5 +29,6 @@ export const makeAppTextStyles = (theme: Theme): AppTextStyles => ({
     onPrimaryContainer: { color: theme.colors.text.onPrimaryContainer },
     error: { color: theme.colors.text.error },
     onErrorContainer: { color: theme.colors.text.onErrorContainer },
+    success: { color: theme.colors.text.success },
   }),
 });
