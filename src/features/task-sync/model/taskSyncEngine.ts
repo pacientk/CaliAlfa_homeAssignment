@@ -1,7 +1,11 @@
 import type { Task, TaskChanges, TaskDraft } from '@entities/task/model';
 import type { ApiFailure } from '@shared/api';
 import { isApiError } from '@shared/api';
-import type { ConnectivityService, ScheduleTimer } from '@shared/services/connectivity';
+import type {
+  CancelTimer,
+  ConnectivityService,
+  ScheduleTimer,
+} from '@shared/services/connectivity';
 import { scheduleWithTimeout } from '@shared/services/connectivity';
 import type { KeyValueStorage } from '@shared/services/storage';
 
@@ -25,7 +29,14 @@ import {
 } from './taskCache';
 import type { TaskTransport } from './TaskTransport';
 
-/** Everything a consumer needs in one immutable value, shaped for `useSyncExternalStore`. */
+/**
+ * Everything a consumer needs in one immutable value, stable by reference until something
+ * changes.
+ *
+ * React never reads it directly. The binding layer subscribes once and pushes each snapshot
+ * into the query cache and the sync store, which is what gives every screen one cache and one
+ * re-render per change.
+ */
 export interface TaskSyncSnapshot {
   tasks: CachedTask[];
   pendingCount: number;
@@ -95,6 +106,9 @@ export const createTaskSyncEngine = (dependencies: TaskSyncDependencies): TaskSy
    */
   let isFailureFromCurrentDrain = false;
   let drainInFlight: Promise<void> | undefined;
+  /** The pending backoff, if one is waiting. Held so `dispose` can call it off. */
+  let cancelRetry: CancelTimer | undefined;
+  let isDisposed = false;
   const listeners = new Set<() => void>();
 
   const buildSnapshot = (): TaskSyncSnapshot => ({
@@ -274,7 +288,12 @@ export const createTaskSyncEngine = (dependencies: TaskSyncDependencies): TaskSy
     const retried: QueuedMutation = { ...head, attempts: head.attempts + 1 };
     queue = [retried, ...queue.slice(1)];
     commit();
-    scheduleTimer(backoffDelayMs(retried.attempts), () => {
+    // At most one backoff is ever outstanding. A drain started by connectivity while an earlier
+    // one is still waiting would otherwise leave that timer behind to fire into a queue it no
+    // longer describes.
+    cancelRetry?.();
+    cancelRetry = scheduleTimer(backoffDelayMs(retried.attempts), () => {
+      cancelRetry = undefined;
       // `drain` never rejects; the timer has nobody to hand a rejection to anyway.
       void drain();
     });
@@ -348,6 +367,11 @@ export const createTaskSyncEngine = (dependencies: TaskSyncDependencies): TaskSy
 
   /** Single-flight: a second caller joins the run in progress rather than racing it. */
   const drain = (): Promise<void> => {
+    if (isDisposed) {
+      // Cancelling the backoff is not enough on its own: a timer that had already fired when
+      // `dispose` ran has its callback queued, and `clearTimeout` cannot take it back.
+      return Promise.resolve();
+    }
     drainInFlight ??= runDrain().finally(() => {
       drainInFlight = undefined;
     });
@@ -380,6 +404,12 @@ export const createTaskSyncEngine = (dependencies: TaskSyncDependencies): TaskSy
     drain,
 
     dispose: (): void => {
+      // The backoff first: a retry that fired after this would write the queue and the cache
+      // back to storage from an engine nobody is listening to any more, which is a disposal
+      // that disposes of nothing.
+      isDisposed = true;
+      cancelRetry?.();
+      cancelRetry = undefined;
       unsubscribeConnectivity();
       listeners.clear();
     },

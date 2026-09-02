@@ -1,6 +1,10 @@
 import type { Task, TaskChanges, TaskDraft } from '@entities/task/model';
 import type { ApiFailure } from '@shared/api';
-import type { ConnectivityService, ScheduleTimer } from '@shared/services/connectivity';
+import type {
+  CancelTimer,
+  ConnectivityService,
+  ScheduleTimer,
+} from '@shared/services/connectivity';
 
 import type { MutationKind } from '../model/QueuedMutation';
 import type { TaskPageSource } from '../model/TaskPageSource';
@@ -158,6 +162,8 @@ export const createFakePageSource = (): FakePageSource => {
 export interface ScheduledTimer {
   delayMs: number;
   run: () => void;
+  /** Set when whoever scheduled it called it off. The timer stays in the list either way. */
+  isCancelled: boolean;
 }
 
 export interface TimerRecorder {
@@ -170,8 +176,12 @@ export const createTimerRecorder = (): TimerRecorder => {
   const timers: ScheduledTimer[] = [];
   return {
     timers,
-    scheduleTimer: (delayMs: number, run: () => void): void => {
-      timers.push({ delayMs, run });
+    scheduleTimer: (delayMs: number, run: () => void): CancelTimer => {
+      const timer: ScheduledTimer = { delayMs, run, isCancelled: false };
+      timers.push(timer);
+      return () => {
+        timer.isCancelled = true;
+      };
     },
   };
 };
