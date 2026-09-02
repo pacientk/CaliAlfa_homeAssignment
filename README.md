@@ -12,61 +12,44 @@ Built as a take-home assignment over a single working day.
 
 **1. Only the Firebase test phone number can sign in.**
 
-There is no APNs auth key for this Firebase project, so the iOS SDK cannot perform silent-push
-device verification; it falls back to reCAPTCHA, and `appVerificationDisabledForTesting` is set
-under `__DEV__` so that the whitelisted test number bypasses verification entirely. Real numbers
-therefore cannot complete sign-in on this build. Use:
-
 | Phone number       | Code     |
 | ------------------ | -------- |
 | `+972 52-828-7009` | `123456` |
 
-This is a property of the environment, not of the implementation — the same code signs in with
-any number once an APNs key is uploaded. Uploading one is the first item in
+This project has no APNs auth key, so the iOS SDK cannot do silent-push device verification and
+falls back to reCAPTCHA; `appVerificationDisabledForTesting` is set under `__DEV__` so the
+whitelisted number bypasses it. A property of the environment, not the implementation — the same
+code signs in with any number once a key is uploaded, which is the first item in
 [`docs/prod-readiness.md`](./docs/prod-readiness.md).
 
-**2. React Native is pinned to 0.80.3.**
+**2. React Native is pinned to 0.80.3.** RN 0.81+ requires Xcode 16.1; this machine has 16.0.
+0.80.3 is the newest line that builds here and still ships React 19 with the compiler. Every
+native dependency is pinned to the release line that matches it, so bumping one in isolation is
+not safe.
 
-RN 0.81 and above require Xcode 16.1; the build machine has Xcode 16.0. 0.80.3 is the newest
-line that builds here, and it still ships React 19 with React Compiler support. Every native
-dependency is pinned to the release line that matches it — Reanimated 3.18, FlashList 2.0,
-react-native-screens 4.11, safe-area-context 5.4, MMKV 3.3, React Native Firebase 22.4. Bumping
-one of them in isolation is not safe on this toolchain.
-
-**3. Tasks are not scoped per user.**
-
-The supplied API is a single shared mockapi.io resource with no owner field and no
-authentication, so every signed-in user sees the same list. Sign-in proves identity and gates
-the app; it does not partition the data. Adding an owner column is the only fix, and it is not
-available on the supplied backend.
+**3. Tasks are not scoped per user.** The supplied API is one shared mockapi.io resource with no
+owner field and no authentication, so every signed-in user sees the same list. Sign-in proves
+identity and gates the app; it does not partition the data.
 
 ---
 
 ## Running it
 
 Prerequisites: macOS with **Xcode 16.0** and its iOS 18.0 simulator runtime, Node 22 via `nvm`,
-and Ruby with Bundler. There is nothing to configure — the Firebase `GoogleService-Info.plist`
-and the API base URL are committed, because neither is a secret: the API is unauthenticated and
-the plist contains only public client identifiers.
+Ruby with Bundler. Nothing to configure — `GoogleService-Info.plist` and the API base URL are
+committed, because neither is a secret: the API is unauthenticated and the plist holds only
+public client identifiers.
 
 ```bash
 nvm use                       # Node 22.23.2, pinned in .nvmrc
 npm ci
-
 bundle install                # installs CocoaPods itself, once
 bundle exec pod install --project-directory=ios
-
-npm start                     # Metro, in its own terminal
 npm run ios                   # builds and launches on the iPhone 16 Pro simulator
 ```
 
-The first pod install and the first native build take several minutes; everything after that is
-incremental. `npm run ios` starts Metro on its own if one is not already running, so the
-separate `npm start` is a convenience rather than a requirement.
-
-Then sign in with the test number and code above.
-
-### Checks
+`npm run ios` starts Metro itself if one is not running. The first pod install and native build
+take several minutes; everything after is incremental. Then sign in with the number above.
 
 ```bash
 npx tsc --noEmit              # exits 0
@@ -74,182 +57,186 @@ npm run lint                  # 0 errors, 0 warnings
 npm test                      # 744 tests across 65 suites
 ```
 
-There is also one end-to-end flow, declared a bonus in the spec and shipped:
+`npm run lint` prints several `[boundaries][warning]` lines first. Those are deprecation notices
+the plugin writes to stdout, not findings; the run still reports zero problems. FW-01 in
+[`docs/future-work.md`](./docs/future-work.md).
+
+One end-to-end flow, a declared bonus in the spec:
 
 ```bash
 curl -Ls "https://get.maestro.mobile.dev" | bash   # once
 maestro test .maestro/task-lifecycle.yaml
 ```
 
-It signs in if the session is not already restored, rejects a duplicate title, creates a task,
-deletes it through the confirmation sheet, and leaves the shared API exactly as it found it. It
-deliberately stops short of the offline cycle: Maestro can drive the taps but cannot assert what
-reached the server, and that assertion is the whole point of the offline claim.
+It signs in if no session is restored, rejects a duplicate title, creates a task, deletes it
+through the confirmation sheet, and leaves the shared API as it found it. It stops short of the
+offline cycle on purpose: Maestro drives taps but cannot assert what reached the server, and that
+assertion is the whole point of the offline claim.
 
-`npm run lint` prints several `[boundaries][warning]` lines before its report. Those are
-deprecation notices printed by `eslint-plugin-boundaries` on stdout, not lint findings; the run
-still reports zero problems. Tracked as FW-01 in [`docs/future-work.md`](./docs/future-work.md).
-
-### iOS only
-
-`android/` ships exactly as the CLI template generated it. It has never been built and is not
-part of the deliverable.
+`android/` ships exactly as the CLI template generated it. It has never been built.
 
 ---
 
 ## What it does
 
-Phone sign-in, then a task list. Tasks carry a title, a description, a free-text category, a
-completion flag, and an optional expiry. You can create, edit, complete, and delete them, and
-search the list by title. Expiry is derived at render rather than stored, so a task becomes
-expired without any mutation — an expired task's row is muted and its checkbox disabled while
-Edit and Delete stay live, and a task completed before it expired still reads as completed.
+Phone sign-in, then a task list. Tasks carry a title, description, free-text category,
+completion flag, and optional expiry; you can create, edit, complete, delete, and search by
+title. Expiry is derived at render rather than stored, so a task expires with no mutation.
 
-Every write works offline. A task created with no network is in the list immediately, survives
-being force-quit, and is sent when the network returns. A banner says when there is unsent work
-and when there is no connection.
+Every write works offline and is sent when the network returns. Failures are told apart by what
+can be done about them — a refused change is rolled back and reported until a later one lands,
+while a list the server will not hand over takes the foreground as a sheet with a retry, because
+nothing else would re-run it. Calendar is a declared placeholder; Settings holds sign-out.
 
-Failures are told apart by what can be done about them. A change the server refuses is rolled
-back and reported, and that report clears itself once a later change gets through. A list the
-server refuses to hand over is a different problem — nothing retries it on its own, and the
-cached list on screen is indistinguishable from a complete one — so it takes the foreground as
-a sheet that offers a retry.
+---
 
-Calendar and Settings are the other two tabs. Calendar is a declared placeholder; Settings holds
-sign-out.
+## Checking the edge cases by hand
+
+The interesting behaviour is in the failure paths, and none of it needs a rebuild. Three levers,
+in the order of how faithful they are.
+
+**The API itself — for everything the server can refuse.** Rename the `tasks` resource in the
+mockapi dashboard and every request 404s while the app stays online, which is exactly the case
+the UI has to tell apart from being offline.
+
+| Do this                     | Expect                                                                     |
+| --------------------------- | -------------------------------------------------------------------------- |
+| Reopen the app              | A sheet — "Could not load your tasks" — over the cached list, with a retry |
+| Add a task                  | It appears, then rolls back, and the banner reports the rejection          |
+| Restore the name, add again | It reaches the server and the rejection banner clears itself               |
+
+The cached list staying visible behind the sheet is the point: without the sheet it is
+indistinguishable from a complete one.
+
+Nothing is rebuilt, reloaded, or restarted, so the sync engine under test is the one that has
+been running the whole time.
+
+**DNS — for the offline cycle.** The Simulator has no airplane mode, and turning the host's Wi-Fi
+off is a bad simulation: the simulator process keeps an unsatisfied route after the interface
+returns and fails every request with `-1009` until it is restarted, which looks exactly like an
+application defect. Break name resolution instead — the route stays satisfied and the running
+process recovers the moment it is restored.
+
+```bash
+networksetup -setdnsservers Wi-Fi 127.0.0.1   # offline
+networksetup -setdnsservers Wi-Fi empty       # back online
+```
+
+Offline, create and edit tasks: the banner turns red, the changes are on screen immediately.
+Force-quit and reopen — they are still there, and the list renders before any request. Restore
+DNS: the banner turns green and counts down the queue. Then check the server rather than the UI,
+because the UI is the thing under test:
+
+```bash
+curl -s "https://67c98b60102d684575c282fe.mockapi.io/api/v1/tasks?p=1&l=50" \
+  | jq '.[] | {id, title, is_done}'
+```
+
+The edit must have landed against the id the create was assigned, not against the local one.
+
+**`API_BASE_URL` — if you would rather not touch the dashboard.** Point
+`src/shared/api/config.ts` at a missing path and press Cmd+R in the simulator; it is a JS
+constant, so no rebuild. Same 404s as the first lever, at the cost of a reload — which recreates
+the engine, so it cannot show you a banner clearing itself.
+
+**The rest, no lever needed.** A task whose expiry has passed renders muted with a disabled
+checkbox while Edit and Delete stay live; one completed before it expired still reads as
+completed. A duplicate title disables the submit button and says why. Delete a task from the
+mockapi dashboard while the app is offline, then reconnect: the queued update against it is
+dropped in silence, because the record being gone is the outcome the user asked for and there is
+nothing to report. Both empty states — no tasks at all, and no search results — carry different
+copy and different actions.
+
+Two things that look like bugs and are not: an error banner outranks "syncing", so the pending
+count is hidden while a rejection is on screen, and the reconnect can lag by five seconds — see
+Known limitations.
 
 ---
 
 ## Architecture — the decisions worth arguing about
 
-The rules are in [`docs/architecture/`](./docs/architecture/) and the reasoning is in
-[`docs/specs/SPEC-001-focus-flow-todo/`](./docs/specs/SPEC-001-focus-flow-todo/). This section is
-only the handful of choices a reader would otherwise have to reverse-engineer.
+Rules in [`docs/architecture/`](./docs/architecture/), reasoning in
+[`docs/specs/SPEC-001-focus-flow-todo/`](./docs/specs/SPEC-001-focus-flow-todo/). Only what a
+reader would otherwise have to reverse-engineer is here.
 
 Layers are Feature-Sliced — `app → navigation → screens → widgets → features → entities →
-shared` — and the direction is enforced by `eslint-plugin-boundaries` at error severity, because
-the architecture is an explicit evaluation criterion and a convention nobody checks is a
-convention nobody keeps.
+shared` — enforced by `eslint-plugin-boundaries` at error severity, because a convention nobody
+checks is a convention nobody keeps.
 
-**The mutation queue sits in front of the API client, not behind a local database.** Three
-shapes were on the table. TanStack Query's own persistence and optimistic updates would have
-been the cheapest, and it is the wrong tool: the query cache models cached reads, not a write
-that has to survive a process restart and replay in order behind the writes that came before it.
-A local database as the source of truth — WatermelonDB, SQLite — with sync as a background
-reconciler is the robust answer and the wrong size; its schema, migrations, and observable
-queries would have outweighed the entire feature set. What ships is a persisted queue in front of
-a typed API client, with the query cache as the read model: the UI reads through TanStack Query,
-which hydrates synchronously from MMKV before its first fetch; writes go to the queue, which
-applies them optimistically to the cache, persists itself, and drains against the network. Around
-200 lines of real logic in `src/features/task-sync/model/taskSyncEngine.ts`, with no React in it
-at all, which is what makes the whole offline claim testable in-process. The React hooks in the
-same feature are a thin binding over it.
+**The mutation queue sits in front of the API client, not behind a local database.** TanStack
+Query's own persistence was the cheap option and the wrong tool: its cache models reads, not a
+write that must survive a restart and replay in order. A local database as the source of truth is
+the robust answer and the wrong size — its schema and migrations would outweigh the feature set.
+What ships is a persisted queue in front of a typed API client, with the query cache as the read
+model, hydrated synchronously from MMKV before the first fetch. Around 200 lines in
+`src/features/task-sync/model/taskSyncEngine.ts` with no React in it, which is what makes the
+offline claim testable in-process.
 
-The invariants that shape the queue: entries drain strictly in order, so a create always precedes
-the update that depends on it; a confirmed create's server id replaces the local id in the cache
-**and** in every later queued entry that targets it; transport failures and 5xx retry with
-backoff; a terminal 4xx rolls the optimistic change back and drops the entry rather than retrying
-forever. Each of those has a test that reads storage back rather than asserting that a helper was
-called.
+Its invariants: entries drain strictly in order, so a create precedes the update that depends on
+it; a confirmed create's server id replaces the local one in the cache **and** in every entry
+queued behind it; transport failures and 5xx retry with backoff; a terminal 4xx rolls the change
+back and drops the entry. A rejection is reported until the next change lands, and survives the
+successes drained in the same pass — otherwise a queue holding one bad entry and one good one
+would raise the message and remove it between two frames, leaving a rollback on screen with
+nothing saying why.
 
-A rolled-back change is reported until the next change reaches the server, and the report
-survives the successes drained in the same pass as the failure — otherwise a queue holding one
-bad entry and one good one would raise the message and remove it between two frames, leaving the
-rollback on screen with nothing saying why.
+**Server state never enters the Zustand store.** Task data lives in TanStack Query; Zustand holds
+only client state that outlives a screen — the session, the in-flight verification, the sync
+status — read through typed selector hooks. Mirroring server data into a client store is what
+produces two sources of truth and, a week later, a list and a detail screen that disagree.
 
-**Server state never enters the Zustand store.** Task data lives in TanStack Query and nowhere
-else. Zustand holds only what is genuinely client state and outlives a single screen — the
-session, the in-flight verification, the sync status — and each is consumed through a typed
-selector hook rather than by importing the store into a component. State that belongs to one
-screen, such as the search query, stays in that screen's hook and never reaches a store at all.
-Mirroring server data into a client store is the cheap decision that produces two sources of
-truth and, a week later, a bug where the list and the detail screen disagree.
-
-**The atom layer exists so that design decisions have exactly one home.** Raw React Native
-primitives are banned outside `src/shared/ui/atoms/`; components compose `AppView`, `AppText`,
-`AppPressable`, `AppTextInput`, `AppFlashList`. It buys three things that are hard to retrofit:
-every colour, spacing, radius, and font size resolves from the theme rather than from a literal,
-so there is no hex string anywhere above the token layer; the 44 pt touch floor is reached
-through hit area inside `AppPressable` rather than by inflating each visual size; and lists are
-recycling by default, because swapping a `FlatList` for a `FlashList` later means touching every
-list screen.
-
-**A screen may not import a route constant.** `ROUTES` lives in `navigation/`, which is _above_
-`screens/` in the layer order, so a screen importing it fails lint. Screens take callbacks —
-`onCreateTask`, `onOpenTask` — and the navigators bind them to routes. The screens are therefore
-mountable in a test without a navigation container, which is why every screen has render tests
-rather than only the navigator having them.
-
-Two smaller ones. Forms are hand-rolled: three fields and one validation rule set do not repay a
-form library. The React Compiler is on, so hand-written `React.memo` / `useMemo` / `useCallback`
-is banned — an exception would need a profiler capture showing the compiler bailed out, and
-fixing the bail-out would be the real fix.
+Three conventions the lint rules enforce, each buying something hard to retrofit. React Native
+primitives are banned outside `src/shared/ui/atoms/`, so no hex string exists above the token
+layer, the 44 pt touch floor comes from hit area rather than inflated visual sizes, and lists
+recycle by default. A screen may not import a route constant — `ROUTES` sits above `screens/` in
+the layer order — so screens take callbacks and mount in tests with no navigation container. The
+React Compiler is on, so hand-written `memo` / `useMemo` / `useCallback` is banned; an exception
+needs a profiler capture showing a bail-out, and fixing the bail-out would be the real fix.
 
 ---
 
 ## Testing
 
-744 tests across 65 suites: unit tests over the two places where a defect stays invisible until
-it corrupts data — title validation and the mutation queue — and React Native Testing Library
-component tests over the row states, the empty states, and the form's validation feedback. Tests
-never touch the live service; the API client is exercised against recorded shapes and the queue
-against a fake transport.
+744 tests across 65 suites, over the two places a defect stays invisible until it corrupts data —
+title validation and the mutation queue — plus RNTL component tests over the row states, the
+empty states, and validation feedback. No test touches the live service.
 
-**Every task was mutation-tested.** After a task's tests went green, deliberate defects were
-introduced into the code under test to prove each test could actually fail. This is the part of
-the engineering worth pointing at, because a green suite that cannot fail is worse than no suite:
-it is a green suite that everyone trusts.
+**Every task was mutation-tested:** once the tests went green, deliberate defects were introduced
+to prove each test could fail. A green suite that cannot fail is worse than no suite, because
+everyone trusts it. It paid for itself twice — a real queue defect where a delete and an update
+against the same task made the record reappear for a frame, and a missing test where the momentum
+card counted the filtered view rather than the whole list.
 
-It paid for itself twice. It found a real defect in the queue — a delete and an update issued
-against the same task made the record reappear for a frame — and one missing test in the list,
-where the momentum card was counting the filtered view rather than the whole list and nothing
-noticed.
-
-It also has a ceiling, and the ceiling is worth stating. Three defects were found only by running
-the app on a simulator and could not have been caught by any test written at this level: a text
-input overlaying its own container at zero opacity, which rendered correctly and could not be
-tapped; a centred navigation title wide enough to sit on top of the back arrow; and the residue of
-the first of those, which the delivery pass found and which is described under Known limitations
-below. All three are geometry or colour, and none of them is something the testing library can see.
+Its ceiling is worth stating: several defects were found only by running the app — an input
+overlaying its container at zero opacity, which rendered correctly and could not be tapped; a
+centred title wide enough to sit on the back arrow; icons pinned to the top of their containers
+by a line height equal to their font size. All geometry or colour, none of it visible to a
+testing library.
 
 ---
 
 ## Known limitations
 
-Beyond the three at the top:
+Beyond the three at the top, and all of them recorded with a repro and a proposed fix:
 
-- **The offline cycle is verified manually, not automatically.** Going offline, restarting the
-  process, and reconnecting are not things this test setup can drive; the verification is the
-  checklist in `docs/specs/SPEC-001-focus-flow-todo/epic.md` §18.4, walked by hand and confirmed
-  by reading the API with `curl` rather than by trusting the UI. It passes: a task created and
-  then edited with no network survives a force-quit, and both the create and the edit reach the
-  server on reconnect, the edit against the server id the create was assigned.
-- **The OTP field's hidden input is faintly visible in the error state.** The six code boxes are
-  a picture drawn over one real text input, which is held at 2% opacity rather than 0 because
-  UIKit will not hit-test a fully transparent view. Two per cent is invisible on the white
-  resting box the constant was calculated against, but the error state fills the box with pale
-  red, and against that the raw six-digit string ghosts through behind the first digit. Cosmetic,
-  reproducible, and filed with its repro and its one-file fix as BUG-001 in `docs/bugs/`.
-- **The offline banner may lag a reconnect by up to five seconds.** Connectivity is inferred from
-  request outcomes rather than from a native network module — the reasoning is in
-  `src/shared/services/connectivity/outcomeConnectivity.ts` — so a recovered network is noticed
-  by the next probe rather than by an OS callback. Self-correcting, and it cannot wedge the
-  queue, but it is a real difference from what a NetInfo-based app would show.
-- **Calendar is a placeholder.** It is declared as one on the artboard and it ships as one.
-- **A first sync that fails inside this app rather than at the server is still silent.** Every
-  throw on the read path is an `ApiError` today, so the gap needs a defect in our own code to
-  reach — but it is the same silence the sheet was added to end, and closing it properly means
-  giving `ApiFailure` a kind that means "this app has a bug". Filed as BUG-002 in `docs/bugs/`.
-- **A response the app cannot parse reads as "Offline".** An unreadable body is classified as a
-  transport failure, which the connectivity service treats as proof the network is down, so a
-  proxy returning an HTML error page would blame the user's connection for a server that in fact
-  answered. FW-07 in `docs/future-work.md`.
-- **One residual sync race.** A mutation that drains _while_ the first sync's pages are still in
-  flight can be dropped from the cache until the next app start. The write itself reaches the
-  server either way, so nothing is lost permanently. FW-04 in `docs/future-work.md` has the full
-  shape and the fix.
-- **Single light theme, English only, LTR only.** All three are deliberate scope cuts recorded in
-  the project profile, not oversights.
+- **The offline cycle is verified by hand.** The DNS lever above plus a `curl` read-back; the
+  harness that would automate it is FW-06.
+- **The OTP field's hidden input ghosts through in the error state.** The boxes are drawn over
+  one real input held at 2% opacity, because UIKit will not hit-test a transparent view — which
+  is invisible on the white box it was calculated against, and faintly visible on the error
+  state's pale red one. BUG-001.
+- **A first sync failing with anything but an `ApiError` is still silent.** Reachable only via a
+  defect in our own code; closing it means giving `ApiFailure` a kind for "this app has a bug".
+  BUG-002.
+- **A response the app cannot parse reads as "Offline",** because an unreadable body is
+  classified as a transport failure — so a proxy's HTML error page blames the user's connection
+  for a server that answered. FW-07.
+- **The offline banner can lag a reconnect by five seconds,** since connectivity is inferred from
+  request outcomes rather than a native module. Self-correcting; it cannot wedge the queue.
+- **One residual sync race:** a mutation draining _while_ the first sync's pages are in flight
+  can be dropped from the cache until the next app start. The write reaches the server either
+  way. FW-04.
+- **Calendar is a placeholder; the app is single-theme, English-only, LTR.** Declared scope cuts.
 
 ---
 
@@ -260,12 +247,12 @@ Beyond the three at the top:
 | `src/`                                 | the application, in Feature-Sliced layers                        |
 | `docs/architecture/`                   | the profile, the principles, the conventions, the coding rules   |
 | `docs/specs/SPEC-001-focus-flow-todo/` | the epic, the task breakdown, the execution plan, the checklists |
-| `docs/bugs/`                           | defect reports — one open, BUG-001                               |
+| `docs/bugs/`                           | defect reports — two open, BUG-001 and BUG-002                   |
+| `docs/future-work.md`                  | deferred work that is not a defect, FW-01 to FW-07               |
 | `docs/prod-readiness.md`               | the console steps no agent can perform                           |
-| `docs/future-work.md`                  | deferred work that is not a defect                               |
 | `docs/workflow.md`                     | how the work was planned and shipped                             |
 | `.maestro/`                            | the one end-to-end flow                                          |
 
-Start with the epic if you want the reasoning, `docs/architecture/PROJECT-PROFILE.md` if you want
-the constraints, and `src/features/task-sync/model/taskSyncEngine.ts` if you want the code that
-is actually interesting.
+Start with the epic for the reasoning, `docs/architecture/PROJECT-PROFILE.md` for the
+constraints, and `src/features/task-sync/model/taskSyncEngine.ts` for the code that is actually
+interesting.
