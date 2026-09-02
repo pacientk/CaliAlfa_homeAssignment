@@ -53,7 +53,7 @@ export const Palette = {
   /** #93000a — text and icons on the error container. */
   red900: '#93000a',
 
-  /** #0f7a52 — success. A checked checkbox and completion only. 5.4:1 on white. */
+  /** #0f7a52 — success. Completion, and the sync banner while work is in flight. 5.4:1 on white. */
   green500: '#0f7a52',
 
   /**

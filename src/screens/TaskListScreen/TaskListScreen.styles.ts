@@ -7,6 +7,7 @@ export interface TaskListScreenStyles {
   readonly header: ViewStyle;
   readonly headerTitle: TextStyle;
   readonly content: ViewStyle;
+  readonly bannerSlot: ViewStyle;
   readonly listContent: ViewStyle;
   readonly rowSlot: ViewStyle;
   readonly emptyLayout: ViewStyle;
@@ -37,6 +38,16 @@ export const makeTaskListScreenStyles = (theme: Theme): TaskListScreenStyles =>
     },
     headerTitle: {
       textAlign: 'center',
+    },
+    // The banner floats over the list instead of sitting in the column with it. In the flow
+    // it pushed every row down the moment connectivity changed and pulled them back when it
+    // cleared; a list should not jump because the radio blinked. It hangs from the bottom of
+    // the header, and `box-none` lets taps through everywhere it is not drawn.
+    bannerSlot: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      alignItems: 'stretch',
     },
     content: {
       flex: 1,
