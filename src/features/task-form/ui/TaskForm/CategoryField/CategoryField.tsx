@@ -1,3 +1,4 @@
+import { CATEGORY_MAX_LENGTH } from '@entities/task';
 import { strings } from '@lib/strings';
 import { AppIcon, AppPressable, AppText, AppTextInput, AppView } from '@ui/atoms';
 import { useThemedStyles } from '@ui/tokens';
@@ -80,6 +81,7 @@ export const CategoryField = ({
           value={value}
           onChangeText={onChange}
           accessibilityLabel={strings.taskForm.category.newCategoryLabel}
+          maxLength={CATEGORY_MAX_LENGTH}
           style={styles.input}
           testID={`${testID}.input`}
         />
