@@ -17,20 +17,27 @@ import type { IAppBottomSheetProps } from './IAppBottomSheet';
  * downward drag, and the close button. There is no cancel row, because nothing here is being
  * committed — a text action would overstate the stakes of closing a picker.
  *
- * The scrim *does* dismiss, unlike the centred modal's. That difference is the point of having
- * two shapes: a sheet offers a choice and a stray tap is a fair way to decline it, while a
- * destructive confirmation is a question the buttons have to answer.
+ * The scrim dismisses by default, because a sheet that offers a choice can fairly be declined
+ * with a stray tap. A sheet that asks a destructive question turns that off along with the
+ * close button, so the only answers are its own two buttons. The shape is shared; the cost of
+ * the action is not, and that distinction lives in these two props rather than in a second
+ * component.
  *
  * The grabber is drawn but not draggable. A real drag needs a gesture handler and an animated
  * translation, and this app deliberately carries no gesture library; the affordance still reads
  * as "this can be dismissed", and the other two ways out are both live.
  */
+/** A press handler for the scrim that is deliberately inert. */
+const noop = (): void => {};
+
 export const AppBottomSheet = ({
   children,
   isVisible,
   onRequestClose,
   title,
   closeLabel,
+  isDismissableByScrim = true,
+  hasCloseButton = true,
   accessibilityLabel,
   testID,
 }: IAppBottomSheetProps): JSX.Element => {
@@ -46,7 +53,8 @@ export const AppBottomSheet = ({
       testID={testID}
     >
       <AppPressable
-        onPress={onRequestClose}
+        onPress={isDismissableByScrim ? onRequestClose : noop}
+        isDisabled={!isDismissableByScrim}
         accessibilityRole="button"
         accessibilityLabel={closeLabel}
         style={styles.scrim}
@@ -71,15 +79,17 @@ export const AppBottomSheet = ({
               {title}
             </AppText>
 
-            <AppPressable
-              onPress={onRequestClose}
-              accessibilityRole="button"
-              accessibilityLabel={closeLabel}
-              style={styles.close}
-              testID={testID === undefined ? undefined : `${testID}.close`}
-            >
-              <AppIcon name="close" size="size20" color="secondary" />
-            </AppPressable>
+            {hasCloseButton ? (
+              <AppPressable
+                onPress={onRequestClose}
+                accessibilityRole="button"
+                accessibilityLabel={closeLabel}
+                style={styles.close}
+                testID={testID === undefined ? undefined : `${testID}.close`}
+              >
+                <AppIcon name="close" size="size20" color="secondary" />
+              </AppPressable>
+            ) : null}
           </AppView>
 
           <AppView style={styles.divider} />

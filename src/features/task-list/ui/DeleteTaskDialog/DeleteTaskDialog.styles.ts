@@ -12,25 +12,29 @@ export interface DeleteTaskDialogStyles {
 }
 
 /**
- * Artboard B3: a 320 pt card, radius 24, 24 pt padding, level-2 shadow, with two equal pill
- * buttons 48 pt tall under 24 pt of space.
+ * Artboard B3's confirmation, redrawn as a bottom sheet so the app has one modal shape
+ * instead of two.
  *
- * The card stretches inside `AppModal`'s 40 pt gutters rather than declaring a fixed 320
- * width. On the 402 pt frame the canvas is drawn for that resolves to 322, and it is the
- * behaviour that survives a narrower device — where a hard 320 would touch both edges.
+ * What B3 still governs is the pair of equal pill buttons, 48 pt tall under 24 pt of space.
+ * What it no longer governs is the container: the sheet draws the surface, the top corners,
+ * the shadow and the header, and the title lives in that header rather than here.
+ *
+ * The sheet this one opens with is deliberately the un-dismissable variant — no close button
+ * and a scrim that does not respond — because a stray tap on the backdrop is not an answer to
+ * "delete this permanently?". The shape is shared with the pickers; the cost of the action is
+ * not.
  */
 export const makeDeleteTaskDialogStyles = (theme: Theme): DeleteTaskDialogStyles =>
   StyleSheet.create({
+    // The sheet draws the surface, the corners and the shadow now; what is left here is the
+    // body's own inset. The title moved into the sheet's header, so the message no longer
+    // needs the 8 pt that separated it from a heading that is no longer its sibling.
     card: {
-      alignSelf: 'stretch',
-      backgroundColor: theme.colors.surface.lowest,
-      borderRadius: theme.borderRadius.radius24,
-      padding: theme.spacing.space24,
-      ...theme.shadows.level2,
+      paddingHorizontal: theme.spacing.space20,
+      paddingTop: theme.spacing.space16,
+      paddingBottom: theme.spacing.space8,
     },
-    message: {
-      marginTop: theme.spacing.space8,
-    },
+    message: {},
     actions: {
       flexDirection: 'row',
       columnGap: theme.spacing.space12,

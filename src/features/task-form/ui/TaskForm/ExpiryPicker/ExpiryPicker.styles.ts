@@ -14,17 +14,17 @@ export interface ExpiryPickerStyles {
 }
 
 /**
- * The modal card artboard B3 defines — radius 24, 24 pt padding, level-2 shadow — reused
- * here because this app draws one kind of modal and a second one would be a design decision
- * nobody made.
+ * The body inside the sheet's chrome. The sheet draws the surface, the top corners, the
+ * shadow and the header, so what is left here is the body's own inset and its sections.
+ *
+ * The title moved into that header, which is why there is no heading in this file any more:
+ * two headings, one per component, is how a shared shell stops being shared.
  */
 export const makeExpiryPickerStyles = (theme: Theme): ExpiryPickerStyles =>
   StyleSheet.create({
     card: {
-      alignSelf: 'stretch',
-      backgroundColor: theme.colors.surface.lowest,
-      borderRadius: theme.borderRadius.radius24,
-      padding: theme.spacing.space24,
+      paddingHorizontal: theme.spacing.space20,
+      paddingTop: theme.spacing.space16,
       ...theme.shadows.level2,
     },
     title: {

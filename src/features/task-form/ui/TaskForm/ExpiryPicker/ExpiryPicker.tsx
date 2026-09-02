@@ -6,7 +6,7 @@ import {
   matchExpirySelection,
 } from '@features/task-form/lib/expiryChoices';
 import { strings } from '@lib/strings';
-import { AppModal, AppPressable, AppText, AppView } from '@ui/atoms';
+import { AppBottomSheet, AppPressable, AppText, AppView } from '@ui/atoms';
 import { useThemedStyles } from '@ui/tokens';
 import type { JSX } from 'react';
 import { useState } from 'react';
@@ -50,17 +50,15 @@ export const ExpiryPicker = ({
   };
 
   return (
-    <AppModal
+    <AppBottomSheet
       isVisible
       onRequestClose={onCancel}
+      title={strings.taskForm.expiry.picker.title}
+      closeLabel={strings.taskForm.expiry.picker.close}
       accessibilityLabel={strings.taskForm.expiry.picker.title}
       testID={testID}
     >
       <AppView style={styles.card}>
-        <AppText variant="title" accessibilityRole="header" style={styles.title}>
-          {strings.taskForm.expiry.picker.title}
-        </AppText>
-
         <AppView style={styles.section}>
           <FieldLabel text={strings.taskForm.expiry.picker.day} />
           <AppView style={styles.chips}>
@@ -121,6 +119,6 @@ export const ExpiryPicker = ({
           </AppPressable>
         </AppView>
       </AppView>
-    </AppModal>
+    </AppBottomSheet>
   );
 };

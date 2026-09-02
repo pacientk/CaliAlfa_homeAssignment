@@ -13,8 +13,6 @@ export type { IAppFlashListProps } from './AppFlashList';
 export { AppFlashList } from './AppFlashList';
 export type { IAppIconProps, IconName, IconSize } from './AppIcon';
 export { AppIcon } from './AppIcon';
-export type { IAppModalProps } from './AppModal';
-export { AppModal } from './AppModal';
 export type { IAppPressableProps, PressableRole } from './AppPressable';
 export { AppPressable } from './AppPressable';
 export type { IAppScrollViewProps } from './AppScrollView';
