@@ -71,7 +71,7 @@ Then sign in with the test number and code above.
 ```bash
 npx tsc --noEmit              # exits 0
 npm run lint                  # 0 errors, 0 warnings
-npm test                      # 696 tests across 61 suites
+npm test                      # 744 tests across 65 suites
 ```
 
 There is also one end-to-end flow, declared a bonus in the spec and shipped:
@@ -106,7 +106,14 @@ expired without any mutation — an expired task's row is muted and its checkbox
 Edit and Delete stay live, and a task completed before it expired still reads as completed.
 
 Every write works offline. A task created with no network is in the list immediately, survives
-being force-quit, and is sent when the network returns. A banner says when there is unsent work.
+being force-quit, and is sent when the network returns. A banner says when there is unsent work
+and when there is no connection.
+
+Failures are told apart by what can be done about them. A change the server refuses is rolled
+back and reported, and that report clears itself once a later change gets through. A list the
+server refuses to hand over is a different problem — nothing retries it on its own, and the
+cached list on screen is indistinguishable from a complete one — so it takes the foreground as
+a sheet that offers a retry.
 
 Calendar and Settings are the other two tabs. Calendar is a declared placeholder; Settings holds
 sign-out.
@@ -145,6 +152,11 @@ backoff; a terminal 4xx rolls the optimistic change back and drops the entry rat
 forever. Each of those has a test that reads storage back rather than asserting that a helper was
 called.
 
+A rolled-back change is reported until the next change reaches the server, and the report
+survives the successes drained in the same pass as the failure — otherwise a queue holding one
+bad entry and one good one would raise the message and remove it between two frames, leaving the
+rollback on screen with nothing saying why.
+
 **Server state never enters the Zustand store.** Task data lives in TanStack Query and nowhere
 else. Zustand holds only what is genuinely client state and outlives a single screen — the
 session, the in-flight verification, the sync status — and each is consumed through a typed
@@ -177,7 +189,7 @@ fixing the bail-out would be the real fix.
 
 ## Testing
 
-696 tests across 61 suites: unit tests over the two places where a defect stays invisible until
+744 tests across 65 suites: unit tests over the two places where a defect stays invisible until
 it corrupts data — title validation and the mutation queue — and React Native Testing Library
 component tests over the row states, the empty states, and the form's validation feedback. Tests
 never touch the live service; the API client is exercised against recorded shapes and the queue
@@ -224,6 +236,14 @@ Beyond the three at the top:
   by the next probe rather than by an OS callback. Self-correcting, and it cannot wedge the
   queue, but it is a real difference from what a NetInfo-based app would show.
 - **Calendar is a placeholder.** It is declared as one on the artboard and it ships as one.
+- **A first sync that fails inside this app rather than at the server is still silent.** Every
+  throw on the read path is an `ApiError` today, so the gap needs a defect in our own code to
+  reach — but it is the same silence the sheet was added to end, and closing it properly means
+  giving `ApiFailure` a kind that means "this app has a bug". Filed as BUG-002 in `docs/bugs/`.
+- **A response the app cannot parse reads as "Offline".** An unreadable body is classified as a
+  transport failure, which the connectivity service treats as proof the network is down, so a
+  proxy returning an HTML error page would blame the user's connection for a server that in fact
+  answered. FW-07 in `docs/future-work.md`.
 - **One residual sync race.** A mutation that drains _while_ the first sync's pages are still in
   flight can be dropped from the cache until the next app start. The write itself reaches the
   server either way, so nothing is lost permanently. FW-04 in `docs/future-work.md` has the full

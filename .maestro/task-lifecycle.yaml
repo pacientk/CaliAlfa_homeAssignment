@@ -20,56 +20,56 @@ name: Task lifecycle — sign in, reject a duplicate title, create, delete
 - runFlow:
     when:
       visible:
-        id: "welcome.next"
+        id: 'welcome.next'
     commands:
       - tapOn:
-          id: "welcome.next"
+          id: 'welcome.next'
       - tapOn:
-          id: "phoneNumber.field"
-      - inputText: "+972528287009"
+          id: 'phoneNumber.field'
+      - inputText: '+972528287009'
       - tapOn:
-          id: "phoneNumber.next"
+          id: 'phoneNumber.next'
       - assertVisible:
-          id: "otp.field"
+          id: 'otp.field'
       - tapOn:
-          id: "otp.field"
-      - inputText: "123456"
+          id: 'otp.field'
+      - inputText: '123456'
       - tapOn:
-          id: "otp.next"
+          id: 'otp.next'
 
 - assertVisible:
-    id: "taskList.list"
+    id: 'taskList.list'
 
 # FR-14: a duplicate title is rejected inline and the submit stays disabled.
 - tapOn:
-    id: "taskList.newTask"
+    id: 'taskList.newTask'
 - assertVisible:
-    id: "taskForm.title"
+    id: 'taskForm.title'
 - tapOn:
-    id: "taskForm.title"
-- inputText: "Renew passport"
-- assertVisible: ".*already exists.*"
+    id: 'taskForm.title'
+- inputText: 'Renew passport'
+- assertVisible: '.*already exists.*'
 
 # A unique title clears it, and the task lands in the list.
 - eraseText: 14
-- inputText: "Post the Maestro flow"
+- inputText: 'Post the Maestro flow'
 - tapOn:
-    id: "taskForm.submit"
+    id: 'taskForm.submit'
 - assertVisible:
-    id: "taskList.list"
-- assertVisible: "Post the Maestro flow"
+    id: 'taskList.list'
+- assertVisible: 'Post the Maestro flow'
 
-# FR-9, FR-10: the row menu, the confirmation modal, and the row gone afterwards.
+# FR-9, FR-10: the row menu, the confirmation sheet, and the row gone afterwards.
 - tapOn:
     id: "taskList\\.row\\..*\\.actions"
     index: 0
-- tapOn: "Delete"
-# The modal's container carries `taskList.deleteDialog`, but a React Native Modal is presented
-# in its own UIWindow and only accessible elements cross into the XCUITest hierarchy — the
-# container is a plain view, so Maestro cannot see it. Its two buttons are pressables and do
-# come through, so the confirm button is what the flow asserts on.
+- tapOn: 'Delete'
+# The sheet's container carries `taskList.deleteDialog`, but the sheet presents through a React
+# Native `Modal`, which lives in its own UIWindow, and only accessible elements cross into the
+# XCUITest hierarchy — the container is a plain view, so Maestro cannot see it. Its buttons are
+# pressables and do come through, so the confirm button is what the flow asserts on.
 - assertVisible:
-    id: "taskList.deleteDialog.confirm"
+    id: 'taskList.deleteDialog.confirm'
 - tapOn:
-    id: "taskList.deleteDialog.confirm"
-- assertNotVisible: "Post the Maestro flow"
+    id: 'taskList.deleteDialog.confirm'
+- assertNotVisible: 'Post the Maestro flow'

@@ -130,3 +130,25 @@ Maestro, flips DNS, and then reads the API back with `curl`.
 half-day of work on the test side that buys nothing for this submission's deadline.
 **Cost of leaving it:** the one claim a reviewer is most likely to probe is the one with no
 regression guard behind it.
+
+## FW-07 — A response the app cannot parse is reported as "Offline"
+
+`malformedResponse` classifies an unreadable body as `transport`, and `reportFailure` treats
+`transport` as proof the network is down. So a server that answers with something that is not
+the expected JSON — an HTML error page from a proxy or a captive portal is the realistic case —
+lights the red offline banner, and the five-second probe retries against it indefinitely. The
+first-sync sheet does not open, because the app believes it is offline and the banner is
+already speaking.
+
+The classification itself is right: a bad body may well parse on a retry, so the request is
+worth repeating. What is wrong is only the sentence the user reads, which names a cause the
+app has evidence against — the server answered.
+
+**Source:** post-delivery review of the error paths, 2026-09-02.
+**Why deferred:** telling the two apart means splitting `transport` into "never reached the
+server" and "reached it and could not read the answer", which changes the union that the
+queue's retry policy and the connectivity service both branch on. That is a data-layer change,
+not a copy change, and it is not worth making under a delivery deadline for a case that needs
+a misbehaving intermediary to reach.
+**Cost of leaving it:** in that scenario the app blames the user's connection for a server
+problem, and offers no retry the user can drive.
