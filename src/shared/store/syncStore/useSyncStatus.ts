@@ -13,3 +13,14 @@ export const usePendingCount = (): number => useSyncStore(state => state.pending
 
 export const useLastSyncError = (): SyncErrorKind | undefined =>
   useSyncStore(state => state.lastError);
+
+export const useFirstSyncError = (): SyncErrorKind | undefined =>
+  useSyncStore(state => state.firstSyncError);
+
+/**
+ * The store action itself rather than a closure over it: zustand compares selector results
+ * with `Object.is`, so a selector that built a new function each call would report a change
+ * on every unrelated store write. The action's identity is stable for the store's lifetime.
+ */
+export const useSetFirstSyncError = (): ((kind: SyncErrorKind | undefined) => void) =>
+  useSyncStore(state => state.setFirstSyncError);

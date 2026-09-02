@@ -16,6 +16,7 @@ import { AppFlashList, AppText, AppView } from '@ui/atoms';
 import { useThemedStyles } from '@ui/tokens';
 import { ProTipCard } from '@widgets/ProTipCard';
 import { SyncBanner } from '@widgets/SyncBanner';
+import { SyncErrorSheet } from '@widgets/SyncErrorSheet';
 import { TaskListEmpty } from '@widgets/TaskListEmpty';
 import { TaskListHeader } from '@widgets/TaskListHeader';
 import type { JSX } from 'react';
@@ -151,6 +152,8 @@ export const TaskListScreen = ({ onCreateTask, onOpenTask }: ITaskListScreenProp
         onCancel={menu.dismissDelete}
         onConfirm={confirmDelete}
       />
+
+      <SyncErrorSheet />
 
       <AppView
         style={[styles.bannerSlot, { top: bannerTop }]}

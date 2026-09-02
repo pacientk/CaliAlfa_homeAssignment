@@ -127,12 +127,24 @@ export const createTaskSyncBindings = (
       const serverTasks = await fetchAllTasks(pageSource, pageSize);
       connectivity.reportSuccess();
       engine.mergeServerTasks(serverTasks, now());
+      useSyncStore.getState().setFirstSyncError(undefined);
     } catch (error) {
       // The read path is evidence about the network too, not only the drain. Without
       // this a cold start with no connection would leave the banner claiming to be
       // online until the user's first write failed.
       if (isApiError(error)) {
         connectivity.reportFailure(error.failure);
+        // Whether this needs saying out loud is decided by what connectivity just
+        // concluded, rather than by re-listing the kinds here — that list already exists
+        // in `reportFailure`, and a second copy is how the two would drift apart.
+        //
+        // Offline means the banner is already saying it and the probe will come back on
+        // its own. Anything else means the server answered and failed: connectivity stays
+        // online, so nothing re-runs this sync, and without a sheet the user is left with
+        // a stale or empty list and no way to tell.
+        if (connectivity.getIsOnline()) {
+          useSyncStore.getState().setFirstSyncError(error.failure.kind);
+        }
       }
       throw error;
     }

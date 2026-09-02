@@ -60,6 +60,9 @@ export interface TaskSyncHarness {
  */
 export const resetSyncStore = (): void => {
   useSyncStore.getState().setSyncState(SYNC_STORE_INITIAL_STATE);
+  // `setSyncState` replaces the engine snapshot only; the read path's failure is written
+  // separately and would otherwise survive into the next test.
+  useSyncStore.getState().setFirstSyncError(undefined);
 };
 
 export const setupTaskSync = (options: Partial<TaskSyncHarnessOptions> = {}): TaskSyncHarness => {

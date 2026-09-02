@@ -4,6 +4,8 @@ export type { CreateTaskAction } from './hooks/useCreateTask';
 export { useCreateTask } from './hooks/useCreateTask';
 export type { DeleteTaskAction } from './hooks/useDeleteTask';
 export { useDeleteTask } from './hooks/useDeleteTask';
+export type { RetryFirstSyncAction } from './hooks/useRetryFirstSync';
+export { useRetryFirstSync } from './hooks/useRetryFirstSync';
 export { useTask } from './hooks/useTask';
 export { useTasks } from './hooks/useTasks';
 export type { ToggleTaskDoneAction } from './hooks/useToggleTaskDone';
