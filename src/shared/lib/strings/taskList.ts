@@ -28,7 +28,6 @@ export const taskList = {
   },
 
   /** Decorative, and labelled as such on sheet D. It reports no state. */
-  focusMode: 'Focus Mode Active',
 
   proTip: {
     label: 'PRO TIP',

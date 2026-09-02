@@ -499,17 +499,15 @@ describe('the screen chrome', () => {
     expect(screen.getByTestId('taskList.noTasks.action')).toBeTruthy();
   });
 
-  it('draws the decorative blocks only while there are rows to focus on', async () => {
+  it('draws the pro tip only while there are rows to read it beside', async () => {
     await mountScreen([taskOf('a', 1)]);
 
-    expect(screen.getByText(strings.taskList.focusMode)).toBeTruthy();
     expect(screen.getByText(strings.taskList.proTip.body)).toBeTruthy();
   });
 
-  it('drops the decorative blocks on an empty list', async () => {
+  it('drops it on an empty list', async () => {
     await mountScreen([]);
 
-    expect(screen.queryByText(strings.taskList.focusMode)).toBeNull();
     expect(screen.queryByText(strings.taskList.proTip.body)).toBeNull();
   });
 });

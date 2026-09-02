@@ -78,7 +78,7 @@ export const LetterSpacing = {
   cardTitle: -0.2,
   /** 0.32 — 0.02em at 16: the phone-number field. */
   input: 0.32,
-  /** 0.6 — 0.05em at 12: the "Focus Mode Active" chip. */
+  /** 0.6 — 0.05em at 12: the category chips on a task row and in the form. */
   chip: 0.6,
   /** 0.7 — 0.05em at 14: button labels and row-menu items. */
   label: 0.7,

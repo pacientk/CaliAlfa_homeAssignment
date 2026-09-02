@@ -4,7 +4,6 @@ import { StyleSheet } from 'react-native';
 
 export interface TaskListHeaderStyles {
   readonly header: ViewStyle;
-  readonly focusBlock: ViewStyle;
   readonly searchField: ViewStyle;
 }
 
@@ -18,9 +17,6 @@ export const makeTaskListHeaderStyles = (theme: Theme): TaskListHeaderStyles =>
   StyleSheet.create({
     header: {
       paddingBottom: theme.spacing.space16,
-    },
-    focusBlock: {
-      marginTop: theme.spacing.space12,
     },
     searchField: {
       marginTop: theme.spacing.space16,

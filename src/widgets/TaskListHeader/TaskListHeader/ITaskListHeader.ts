@@ -11,6 +11,4 @@ export interface ITaskListHeaderProps {
    * disabled-looking control would only invite a tap that does nothing.
    */
   readonly hasSearchField: boolean;
-  /** The decorative block sits above the field only while the list has rows to focus on. */
-  readonly hasFocusModeBlock: boolean;
 }
