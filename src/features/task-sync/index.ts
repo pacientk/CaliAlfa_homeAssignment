@@ -1,5 +1,3 @@
-export type { ClearSyncErrorAction } from './hooks/useClearSyncError';
-export { useClearSyncError } from './hooks/useClearSyncError';
 export type { CreateTaskAction } from './hooks/useCreateTask';
 export { useCreateTask } from './hooks/useCreateTask';
 export type { DeleteTaskAction } from './hooks/useDeleteTask';
