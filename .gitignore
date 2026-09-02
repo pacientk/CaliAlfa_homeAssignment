@@ -73,3 +73,10 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# Firebase client configuration
+#
+# Not committed. It is per-project rather than per-app: whoever builds this points it at their
+# own Firebase project, and a plist in the repository would be one more thing to rotate the day
+# the project changes hands. `GoogleService-Info.example.plist` documents the shape.
+ios/CaliAlfa/GoogleService-Info.plist

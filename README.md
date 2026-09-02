@@ -35,9 +35,16 @@ identity and gates the app; it does not partition the data.
 ## Running it
 
 Prerequisites: macOS with **Xcode 16.0** and its iOS 18.0 simulator runtime, Node 22 via `nvm`,
-Ruby with Bundler. Nothing to configure — `GoogleService-Info.plist` and the API base URL are
-committed, because neither is a secret: the API is unauthenticated and the plist holds only
-public client identifiers.
+Ruby with Bundler.
+
+One thing to supply: `ios/CaliAlfa/GoogleService-Info.plist`, which is gitignored. Download it
+from your Firebase project — Project settings → Your apps → the iOS app — and drop it in beside
+`GoogleService-Info.example.plist`, which documents the shape and nothing else. The iOS app you
+register has to use the bundle identifier `org.reactjs.native.example.CaliAlfa`, or
+`FirebaseApp.configure()` fails at launch. Without the file the build succeeds and the app dies
+on its first frame.
+
+The API base URL is committed, because it is a public unauthenticated mockapi.io resource.
 
 ```bash
 nvm use                       # Node 22.23.2, pinned in .nvmrc

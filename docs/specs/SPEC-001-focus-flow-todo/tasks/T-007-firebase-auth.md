@@ -28,7 +28,9 @@ avoid.
 
 ## Scope
 
-- `GoogleService-Info.plist` added to the iOS target and committed.
+- `GoogleService-Info.plist` added to the iOS target and committed. **(No longer committed —
+  removed from the repository and from its history on 2026-09-02; see the note at the foot
+  of this file.)**
 - Firebase initialised at native startup.
 - `sendVerificationCode(phone)` and `confirmCode(code)` behind a typed service.
 - A session store: signed-in flag, the user's phone number, initialising flag.
@@ -148,3 +150,19 @@ unit under test would prove nothing (VR-11).
   implemented and tested, but the navigator switches on `useIsSignedIn()` alone, so a
   returning user can still see one frame of the welcome screen. Wiring it is T-008/T-012
   work; the store's surface is ready for it.
+
+---
+
+## Post-delivery note — the Firebase plist is no longer in the repository
+
+Removed on 2026-09-02, gitignored, and purged from the history. The task shipped it deliberately,
+on the reasoning recorded in the epic: the Firebase API key is a client identifier, not a secret.
+That reasoning was right about the key and wrong about the file — the plist is a working pointer
+at one specific Firebase project, and a repository that carries one hands that project over with
+the code.
+
+`GoogleService-Info.example.plist` documents the shape. The consequence that outlives the
+deletion is in `prod-readiness.md`: the key was published and has to be restricted or rotated
+regardless of what the history looks like now.
+
+The sentences above are left as written, for the reason the T-009 note gives.
