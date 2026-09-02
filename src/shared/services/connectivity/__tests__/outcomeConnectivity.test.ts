@@ -47,12 +47,6 @@ describe('createOutcomeConnectivity — deriving connectivity from request outco
     expect(connectivity.getIsOnline()).toBe(false);
   });
 
-  it('goes offline after an explicit offline failure', () => {
-    const { connectivity } = setup();
-    connectivity.reportFailure({ kind: 'offline' });
-    expect(connectivity.getIsOnline()).toBe(false);
-  });
-
   it('stays online after a 5xx — reaching the server is proof of connectivity', () => {
     const { connectivity } = setup();
     connectivity.reportFailure({ kind: 'server', status: 503 });
@@ -169,7 +163,7 @@ describe('createOutcomeConnectivity — deriving connectivity from request outco
     const { connectivity, timers } = setup();
     connectivity.reportFailure(TRANSPORT_FAILURE);
     connectivity.reportFailure(TRANSPORT_FAILURE);
-    connectivity.reportFailure({ kind: 'offline' });
+    connectivity.reportFailure({ kind: 'transport', cause: new Error('dns') });
     expect(timers).toHaveLength(1);
   });
 

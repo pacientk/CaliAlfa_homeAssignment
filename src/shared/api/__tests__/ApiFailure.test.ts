@@ -32,7 +32,6 @@ describe('classifyHttpStatus', () => {
 
 describe('isRetryableFailure', () => {
   const retryable: ApiFailure[] = [
-    { kind: 'offline' },
     { kind: 'transport', cause: new Error('socket closed') },
     { kind: 'server', status: 500 },
   ];

@@ -87,7 +87,6 @@ export const syncBanner = {
   pending: (pendingCount: number): string =>
     pendingCount === 1 ? 'Syncing 1 change…' : `Syncing ${pendingCount} changes…`,
   error: {
-    offline: 'Offline — changes will sync later',
     transport: "We couldn't reach the server. Your changes are still here.",
     server: 'The server had a problem. Your changes are still here.',
     notFound: 'That task is no longer on the server.',
@@ -110,7 +109,6 @@ export const syncBanner = {
 export const syncErrorSheet = {
   title: 'Could not load your tasks',
   message: {
-    offline: 'There is no connection. The list is the copy saved on this device.',
     transport:
       "We couldn't reach the server. The list is the copy saved on this device, and it may be out of date.",
     server:

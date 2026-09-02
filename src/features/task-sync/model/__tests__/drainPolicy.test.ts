@@ -32,10 +32,6 @@ describe('backoffDelayMs', () => {
 });
 
 describe('classifyDrainFailure — retry, drop the record, or give up', () => {
-  it('retries an offline failure', () => {
-    expect(classifyDrainFailure({ kind: 'offline' }, 'update')).toBe('retry');
-  });
-
   it('retries a transport failure', () => {
     expect(classifyDrainFailure(TRANSPORT, 'create')).toBe('retry');
   });

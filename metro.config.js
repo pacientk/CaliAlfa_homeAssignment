@@ -18,7 +18,6 @@ const alias = {
   '@lib': path.resolve(__dirname, 'src/shared/lib'),
   '@api': path.resolve(__dirname, 'src/shared/api'),
   '@services': path.resolve(__dirname, 'src/shared/services'),
-  '@config': path.resolve(__dirname, 'src/shared/config'),
   '@store': path.resolve(__dirname, 'src/shared/store'),
 };
 

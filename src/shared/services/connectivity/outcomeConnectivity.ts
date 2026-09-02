@@ -101,7 +101,7 @@ export const createOutcomeConnectivity = (
     },
 
     reportFailure: (failure: ApiFailure): void => {
-      if (failure.kind === 'offline' || failure.kind === 'transport') {
+      if (failure.kind === 'transport') {
         goOffline();
         return;
       }

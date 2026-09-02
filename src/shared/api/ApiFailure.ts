@@ -5,10 +5,13 @@
  * terminal one is discarded.
  */
 export type ApiFailure =
-  /** No connectivity at all. Only the connectivity service can tell this apart from
-   * a generic transport error, so the HTTP client never produces this kind itself. */
-  | { kind: 'offline' }
-  /** DNS, socket, timeout, or an unreadable response body. */
+  /**
+   * DNS, socket, timeout, or an unreadable response body — and a lost connection, which is
+   * indistinguishable from the rest at this layer. There is deliberately no separate `offline`
+   * kind: nothing can construct one. `fetch` rejects the same way whether the interface is down
+   * or the host is unreachable, and the connectivity service is a consumer of these failures
+   * rather than a producer of them, so a kind only it could raise would be a kind nobody raises.
+   */
   | { kind: 'transport'; cause: unknown }
   /** 5xx, plus 408 and 429 — the server asked us, explicitly or implicitly, to come back. */
   | { kind: 'server'; status: number }
@@ -25,7 +28,6 @@ const HTTP_TOO_MANY_REQUESTS = 429;
 const HTTP_SERVER_ERROR_MIN = 500;
 
 const RETRYABLE_KINDS: ReadonlySet<ApiFailure['kind']> = new Set<ApiFailure['kind']>([
-  'offline',
   'transport',
   'server',
 ]);

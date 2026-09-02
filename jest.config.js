@@ -15,7 +15,6 @@ const moduleNameMapper = {
   '^@lib/(.*)$': '<rootDir>/src/shared/lib/$1',
   '^@api/(.*)$': '<rootDir>/src/shared/api/$1',
   '^@services/(.*)$': '<rootDir>/src/shared/services/$1',
-  '^@config/(.*)$': '<rootDir>/src/shared/config/$1',
   '^@store/(.*)$': '<rootDir>/src/shared/store/$1',
 };
 

@@ -20,7 +20,6 @@
       "@lib/*": ["src/shared/lib/*"],
       "@api/*": ["src/shared/api/*"],
       "@services/*": ["src/shared/services/*"],
-      "@config/*": ["src/shared/config/*"],
       "@store/*": ["src/shared/store/*"]
     }
   },
