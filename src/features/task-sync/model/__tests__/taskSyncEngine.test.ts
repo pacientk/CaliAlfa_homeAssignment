@@ -361,10 +361,31 @@ describe('S-3 — a terminal 4xx on the head', () => {
     expect(harness.transport.calls).toHaveLength(1);
   });
 
-  it('clears the surfaced failure on request', async () => {
+  it('clears the surfaced failure once a later change gets through', async () => {
     const harness = await arrange();
-    harness.engine.clearLastFailure();
+    expect(harness.engine.getSnapshot().lastFailure).toBeDefined();
+
+    harness.engine.enqueueUpdate('server-1', { title: 'Renamed again' });
+    await harness.engine.drain();
+
     expect(harness.engine.getSnapshot().lastFailure).toBeUndefined();
+  });
+
+  it('keeps a failure that the same pass went on to drain past', async () => {
+    const harness = setup();
+    harness.engine.mergeServerTasks([serverTask('server-1', { title: 'Original' })], isoAt(0));
+    harness.advanceClock();
+    // Two entries, drained in one pass: the first is refused, the second goes through. The
+    // rollback is the only thing the user can see happen, so the sentence explaining it has
+    // to outlive the success queued behind it.
+    harness.engine.enqueueUpdate('server-1', { title: 'Renamed' });
+    harness.engine.enqueueCreate(draftOf());
+    harness.transport.script('update', { error: new ApiError({ kind: 'client', status: 400 }) });
+
+    await harness.engine.drain();
+
+    expect(harness.engine.getSnapshot().lastFailure).toEqual({ kind: 'client', status: 400 });
+    expect(harness.engine.getSnapshot().pendingCount).toBe(0);
   });
 
   it('removes a task whose create failed terminally', async () => {

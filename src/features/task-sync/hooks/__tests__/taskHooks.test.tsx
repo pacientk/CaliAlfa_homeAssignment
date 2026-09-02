@@ -16,7 +16,6 @@ import { ApiError } from '@shared/api';
 import { createMemoryStorage } from '@shared/services/storage';
 import { act, render, renderHook, waitFor } from '@testing-library/react-native';
 
-import { useClearSyncError } from '../useClearSyncError';
 import { useCreateTask } from '../useCreateTask';
 import { useDeleteTask } from '../useDeleteTask';
 import { useTask } from '../useTask';
@@ -34,7 +33,6 @@ interface TaskApi {
   updateTask: ReturnType<typeof useUpdateTask>;
   deleteTask: ReturnType<typeof useDeleteTask>;
   toggleTaskDone: ReturnType<typeof useToggleTaskDone>;
-  clearSyncError: ReturnType<typeof useClearSyncError>;
 }
 
 const useTaskApi = (): TaskApi => ({
@@ -43,7 +41,6 @@ const useTaskApi = (): TaskApi => ({
   updateTask: useUpdateTask(),
   deleteTask: useDeleteTask(),
   toggleTaskDone: useToggleTaskDone(),
-  clearSyncError: useClearSyncError(),
 });
 
 const mountTaskApi = async (harness: TaskSyncHarness): Promise<{ current: TaskApi }> => {

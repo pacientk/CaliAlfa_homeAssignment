@@ -47,7 +47,6 @@ export interface TaskSyncEngine {
   mergeServerTasks(serverTasks: readonly Task[], observedAt: string): void;
   /** Sends what it can, in order. Never rejects. */
   drain(): Promise<void>;
-  clearLastFailure(): void;
   dispose(): void;
 }
 
@@ -79,6 +78,15 @@ export const createTaskSyncEngine = (dependencies: TaskSyncDependencies): TaskSy
   let tasks: CachedTask[] = readTaskCache(storage);
   let queue: QueuedMutation[] = readMutationQueue(storage);
   let lastFailure: ApiFailure | undefined;
+  /**
+   * Whether `lastFailure` was recorded by the pass that is running now.
+   *
+   * It exists so that a success cannot erase a failure the user has not had a chance to see.
+   * A queue holding one rejected change and one good one drains both in a single pass, and
+   * without this the rollback would be reported and un-reported between two frames — the
+   * change would vanish from the screen with nothing left saying why.
+   */
+  let isFailureFromCurrentDrain = false;
   let drainInFlight: Promise<void> | undefined;
   const listeners = new Set<() => void>();
 
@@ -231,6 +239,13 @@ export const createTaskSyncEngine = (dependencies: TaskSyncDependencies): TaskSy
     } else {
       tasks = removeTask(tasks, entry.taskId);
     }
+    // A change that got through makes the last rejection stale: it is a sentence about a
+    // request that is no longer the most recent thing to have happened, and the banner it
+    // occupies is the same one that reports what is still pending. Nothing else clears it,
+    // which is how it used to sit on screen until the app was restarted.
+    if (!isFailureFromCurrentDrain) {
+      lastFailure = undefined;
+    }
     commit();
   };
 
@@ -269,6 +284,7 @@ export const createTaskSyncEngine = (dependencies: TaskSyncDependencies): TaskSy
     dropHead();
     rollback(entry);
     lastFailure = failure;
+    isFailureFromCurrentDrain = true;
     commit();
     return true;
   };
@@ -311,6 +327,9 @@ export const createTaskSyncEngine = (dependencies: TaskSyncDependencies): TaskSy
   };
 
   const runDrain = async (): Promise<void> => {
+    // Scoped to the pass, not the engine: a failure recorded here has to outlive the
+    // successes that follow it in this pass, and must not outlive the pass itself.
+    isFailureFromCurrentDrain = false;
     let shouldContinue = true;
     while (shouldContinue) {
       // Sequential on purpose: strict order is invariant 1, and a create must be confirmed
@@ -349,11 +368,6 @@ export const createTaskSyncEngine = (dependencies: TaskSyncDependencies): TaskSy
     enqueueDelete,
     mergeServerTasks,
     drain,
-
-    clearLastFailure: (): void => {
-      lastFailure = undefined;
-      notify();
-    },
 
     dispose: (): void => {
       unsubscribeConnectivity();
