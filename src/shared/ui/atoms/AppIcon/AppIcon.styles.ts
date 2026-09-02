@@ -12,25 +12,31 @@ export interface AppIconStyles {
 }
 
 /**
- * `lineHeight` equals `fontSize` on every rung because the canvas sets every icon span to
- * `line-height:1`. A Material Symbols glyph is drawn to fill its em box, so a line box the
- * same height as the em box is what centres the glyph inside a fixed-size tile; React
- * Native's default line height would add leading above and below and push the glyph off
- * centre by a pixel or two at every size.
+ * No `lineHeight`. The canvas sets every icon span to `line-height:1`, and copying that here
+ * was wrong: a line box the height of the em box does not centre a Material Symbols glyph on
+ * iOS, it pins it to the top. The font's ascent reaches above the em square, and UIKit lays
+ * text out from the top of the line box — so the glyph rides up and out, which is why every
+ * icon in the app sat high in its container.
+ *
+ * Leaving the line height to the font gives a box tall enough for the glyph's real metrics,
+ * and the glyph then sits in the middle of it. Callers centre that box the way they centre
+ * any other child.
+ *
+ * `textAlignVertical` is not the fix; it is an Android-only property and does nothing here.
  */
 export const makeAppIconStyles = (theme: Theme): AppIconStyles => ({
   face: { fontFamily: theme.iconFontFamily },
   size: StyleSheet.create({
-    size12: { fontSize: theme.iconSizes.size12, lineHeight: theme.iconSizes.size12 },
-    size14: { fontSize: theme.iconSizes.size14, lineHeight: theme.iconSizes.size14 },
-    size16: { fontSize: theme.iconSizes.size16, lineHeight: theme.iconSizes.size16 },
-    size18: { fontSize: theme.iconSizes.size18, lineHeight: theme.iconSizes.size18 },
-    size20: { fontSize: theme.iconSizes.size20, lineHeight: theme.iconSizes.size20 },
-    size22: { fontSize: theme.iconSizes.size22, lineHeight: theme.iconSizes.size22 },
-    size24: { fontSize: theme.iconSizes.size24, lineHeight: theme.iconSizes.size24 },
-    size26: { fontSize: theme.iconSizes.size26, lineHeight: theme.iconSizes.size26 },
-    size28: { fontSize: theme.iconSizes.size28, lineHeight: theme.iconSizes.size28 },
-    size30: { fontSize: theme.iconSizes.size30, lineHeight: theme.iconSizes.size30 },
+    size12: { fontSize: theme.iconSizes.size12 },
+    size14: { fontSize: theme.iconSizes.size14 },
+    size16: { fontSize: theme.iconSizes.size16 },
+    size18: { fontSize: theme.iconSizes.size18 },
+    size20: { fontSize: theme.iconSizes.size20 },
+    size22: { fontSize: theme.iconSizes.size22 },
+    size24: { fontSize: theme.iconSizes.size24 },
+    size26: { fontSize: theme.iconSizes.size26 },
+    size28: { fontSize: theme.iconSizes.size28 },
+    size30: { fontSize: theme.iconSizes.size30 },
   }),
   color: StyleSheet.create({
     primary: { color: theme.colors.text.primary },

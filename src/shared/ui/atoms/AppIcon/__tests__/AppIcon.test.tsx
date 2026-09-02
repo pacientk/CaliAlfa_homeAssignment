@@ -30,11 +30,16 @@ describe('AppIcon glyph', () => {
 });
 
 describe('AppIcon size', () => {
-  it('applies the requested glyph size, with a line box the same height', () => {
+  it('applies the requested glyph size and sets no line height at all', () => {
+    // A line box the height of the em box does not centre a Material Symbols glyph on iOS —
+    // it pins it to the top, because the font's ascent reaches above the em square and text
+    // is laid out from the top of the line box. Leaving the line height to the font is what
+    // puts the glyph in the middle of its own box, so the absence is the fix, not an
+    // omission.
     const style = styleOf(renderIcon({ size: 'size28' }));
 
     expect(style.fontSize).toBe(lightTheme.iconSizes.size28);
-    expect(style.lineHeight).toBe(lightTheme.iconSizes.size28);
+    expect(style.lineHeight).toBeUndefined();
   });
 
   it('defaults to size20 rather than to whatever was asked for last', () => {
