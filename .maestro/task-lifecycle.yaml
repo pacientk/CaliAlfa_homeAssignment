@@ -3,8 +3,14 @@
 # duplicate title, accept a good one, and delete the task again so the flow leaves the shared
 # API exactly as it found it.
 #
-# Run with the simulator booted and Metro running:
-#   maestro test .maestro/task-lifecycle.yaml
+# Run with the simulator booted and Metro running, passing a phone number registered under
+# Firebase Console -> Authentication -> Sign-in method -> Phone -> Test phone numbers, and the
+# code registered with it:
+#   maestro test -e TEST_PHONE=+972500000000 -e TEST_CODE=000000 .maestro/task-lifecycle.yaml
+#
+# The credentials are parameters rather than literals because they belong to whoever is running
+# this, not to the repository. A real number committed here would be one more place to scrub the
+# day the project changes hands.
 #
 # It deliberately does not cover the offline cycle. Maestro can drive the taps but cannot
 # assert what reached the server, and that assertion is the whole point of the offline claim —
@@ -12,6 +18,9 @@
 
 appId: org.reactjs.native.example.CaliAlfa
 name: Task lifecycle — sign in, reject a duplicate title, create, delete
+env:
+  TEST_PHONE: ''
+  TEST_CODE: ''
 ---
 - launchApp
 
@@ -26,14 +35,14 @@ name: Task lifecycle — sign in, reject a duplicate title, create, delete
           id: 'welcome.next'
       - tapOn:
           id: 'phoneNumber.field'
-      - inputText: '+972528287009'
+      - inputText: '${TEST_PHONE}'
       - tapOn:
           id: 'phoneNumber.next'
       - assertVisible:
           id: 'otp.field'
       - tapOn:
           id: 'otp.field'
-      - inputText: '123456'
+      - inputText: '${TEST_CODE}'
       - tapOn:
           id: 'otp.next'
 

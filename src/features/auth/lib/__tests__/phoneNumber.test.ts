@@ -25,7 +25,7 @@ describe('sanitising what the field accepts', () => {
   });
 
   it('does not invent a plus for a number typed without one', () => {
-    expect(sanitisePhoneInput('052 828 7009')).toBe('052 828 7009');
+    expect(sanitisePhoneInput('050 000 0000')).toBe('050 000 0000');
   });
 
   it('returns nothing for an empty field', () => {
@@ -35,17 +35,17 @@ describe('sanitising what the field accepts', () => {
 
 describe('normalising to E.164', () => {
   it('removes the grouping spaces and keeps one leading plus', () => {
-    expect(toE164('+972 52-828-7009')).toBe('+972528287009');
+    expect(toE164('+972 50-000-0000')).toBe('+972500000000');
   });
 
   it('is idempotent on an already normalised number', () => {
-    expect(toE164('+972528287009')).toBe('+972528287009');
+    expect(toE164('+972500000000')).toBe('+972500000000');
   });
 });
 
 describe('the plausibility gate', () => {
   it('accepts an international number of a possible length', () => {
-    expect(isPlausiblePhoneNumber('+972 52-828-7009')).toBe(true);
+    expect(isPlausiblePhoneNumber('+972 50-000-0000')).toBe(true);
   });
 
   it('accepts the shortest and the longest E.164 numbers there can be', () => {
@@ -60,7 +60,7 @@ describe('the plausibility gate', () => {
   });
 
   it('rejects a number with no country code, rather than guessing one', () => {
-    expect(isPlausiblePhoneNumber('528287009')).toBe(false);
+    expect(isPlausiblePhoneNumber('500000000')).toBe(false);
   });
 
   it('rejects a prefix on its own', () => {
@@ -70,7 +70,7 @@ describe('the plausibility gate', () => {
 
 describe('the national half of the field', () => {
   it('keeps digits and the spaces people group them with', () => {
-    expect(sanitiseNationalNumber('52 828 7009')).toBe('52 828 7009');
+    expect(sanitiseNationalNumber('50 000 0000')).toBe('50 000 0000');
   });
 
   it('drops a plus, wherever it is typed', () => {
@@ -80,14 +80,14 @@ describe('the national half of the field', () => {
   });
 
   it('drops letters and punctuation', () => {
-    expect(sanitiseNationalNumber('52-828-7009')).toBe('528287009');
+    expect(sanitiseNationalNumber('50-000-0000')).toBe('500000000');
     expect(sanitiseNationalNumber('abc 666')).toBe(' 666');
   });
 });
 
 describe('composing the chosen country with the typed number', () => {
   it('joins them into E.164, stripping the grouping spaces', () => {
-    expect(composeE164('+972', '52 828 7009')).toBe('+972528287009');
+    expect(composeE164('+972', '50 000 0000')).toBe('+972500000000');
   });
 
   it('produces the country alone when nothing has been typed', () => {
@@ -97,7 +97,7 @@ describe('composing the chosen country with the typed number', () => {
   it('is plausible only once the composed number is long enough', () => {
     expect(isPlausibleNumberParts('+972', '')).toBe(false);
     expect(isPlausibleNumberParts('+972', '5282')).toBe(false);
-    expect(isPlausibleNumberParts('+972', '52 828 7009')).toBe(true);
+    expect(isPlausibleNumberParts('+972', '50 000 0000')).toBe(true);
   });
 
   it('is implausible when the composed number is too long for E.164', () => {

@@ -10,16 +10,15 @@ Built as a take-home assignment over a single working day.
 
 ## Read this first — three things that will otherwise surprise you
 
-**1. Only the Firebase test phone number can sign in.**
+**1. Only a Firebase test phone number can sign in.** This project has no APNs auth key, so the
+iOS SDK cannot do silent-push device verification and falls back to reCAPTCHA;
+`appVerificationDisabledForTesting` is set under `__DEV__` so a whitelisted number bypasses it
+entirely. Sign in with a number registered under **Authentication → Sign-in method → Phone →
+Test phone numbers**, and its code. None is committed here — a test credential belongs to
+whoever is running the app, not to the repository.
 
-| Phone number       | Code     |
-| ------------------ | -------- |
-| `+972 52-828-7009` | `123456` |
-
-This project has no APNs auth key, so the iOS SDK cannot do silent-push device verification and
-falls back to reCAPTCHA; `appVerificationDisabledForTesting` is set under `__DEV__` so the
-whitelisted number bypasses it. A property of the environment, not the implementation — the same
-code signs in with any number once a key is uploaded, which is the first item in
+A property of the environment, not the implementation: the same code signs in with any number
+once an APNs key is uploaded, which is the first item in
 [`docs/prod-readiness.md`](./docs/prod-readiness.md).
 
 **2. React Native is pinned to 0.80.3.** RN 0.81+ requires Xcode 16.1; this machine has 16.0.
@@ -49,7 +48,7 @@ npm run ios                   # builds and launches on the iPhone 16 Pro simulat
 ```
 
 `npm run ios` starts Metro itself if one is not running. The first pod install and native build
-take several minutes; everything after is incremental. Then sign in with the number above.
+take several minutes; everything after is incremental. Then sign in with your test number.
 
 ```bash
 npx tsc --noEmit              # exits 0
@@ -65,11 +64,12 @@ One end-to-end flow, a declared bonus in the spec:
 
 ```bash
 curl -Ls "https://get.maestro.mobile.dev" | bash   # once
-maestro test .maestro/task-lifecycle.yaml
+maestro test -e TEST_PHONE=+972500000000 -e TEST_CODE=000000 .maestro/task-lifecycle.yaml
 ```
 
-It signs in if no session is restored, rejects a duplicate title, creates a task, deletes it
-through the confirmation sheet, and leaves the shared API as it found it. It stops short of the
+The two parameters are your test number and its code; the flow signs in only when no session is
+restored, so they go unused on a warm run. It rejects a duplicate title, creates a task, deletes
+it through the confirmation sheet, and leaves the shared API as it found it. It stops short of the
 offline cycle on purpose: Maestro drives taps but cannot assert what reached the server, and that
 assertion is the whole point of the offline claim.
 

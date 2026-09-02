@@ -30,8 +30,9 @@ Reproducible from a clean checkout; no fixture depends on any particular server 
 1. `nvm use && npm ci && bundle install && bundle exec pod install --project-directory=ios`
 2. `npm run ios`
 3. Sign out if a session is restored, then walk Welcome → **Next** → phone number
-   `+972 52-828-7009` → **Next**.
-4. Type any six digits that are **not** `123456` — `111111` is the clearest, because six
+   a registered Firebase test number → **Next**.
+4. Type any six digits that are **not** that number's registered code — `111111` is the
+   clearest, because six
    identical glyphs make the artefact easy to see — and press **Next**.
 5. Wait for the error state to render, then look at the **first** box.
 

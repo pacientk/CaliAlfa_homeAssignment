@@ -18,7 +18,7 @@ const mockSignInWithPhoneNumber = jest.mocked(signInWithPhoneNumber);
 const mockOnAuthStateChanged = jest.mocked(onAuthStateChanged);
 const mockSignOut = jest.mocked(signOut);
 
-const TEST_PHONE = '+972528287009';
+const TEST_PHONE = '+972500000000';
 
 /** A rejection shaped the way the Firebase SDK shapes one. */
 const firebaseErrorWithCode = (code: string): Error & { code: string } =>
