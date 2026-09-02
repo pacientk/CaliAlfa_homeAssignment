@@ -110,7 +110,7 @@ export const lightTheme: Theme = {
     body: {
       fontFamily: FontFamily.regular,
       fontSize: FontSize.size16,
-      lineHeight: LineHeight.height24,
+      lineHeight: LineHeight.height20,
       fontWeight: FontWeight.regular,
       letterSpacing: LetterSpacing.none,
     },
