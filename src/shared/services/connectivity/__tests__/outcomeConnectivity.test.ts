@@ -92,11 +92,77 @@ describe('createOutcomeConnectivity — deriving connectivity from request outco
     expect(timers[0]?.delayMs).toBe(PROBE_DELAY_MS);
   });
 
-  it('reports itself online again once the probe fires, so the queue will retry', () => {
+  it('permits one attempt once the probe fires, which is how a recovery is ever noticed', () => {
+    const { connectivity, timers } = setup();
+    connectivity.reportFailure(TRANSPORT_FAILURE);
+    expect(connectivity.getShouldAttempt()).toBe(false);
+
+    fireOldest(timers);
+
+    expect(connectivity.getShouldAttempt()).toBe(true);
+  });
+
+  it('does not claim to be online when the probe fires — nothing has happened to justify it', () => {
     const { connectivity, timers } = setup();
     connectivity.reportFailure(TRANSPORT_FAILURE);
     fireOldest(timers);
+    expect(connectivity.getIsOnline()).toBe(false);
+  });
+
+  it('stays offline when the attempt the probe bought fails as well', () => {
+    const { connectivity, timers } = setup();
+    connectivity.reportFailure(TRANSPORT_FAILURE);
+    fireOldest(timers);
+    connectivity.reportFailure(TRANSPORT_FAILURE);
+    expect(connectivity.getIsOnline()).toBe(false);
+  });
+
+  it('never reports online across a whole outage, however many probes come and go', () => {
+    const { connectivity, timers } = setup();
+    const reported: boolean[] = [];
+    connectivity.subscribe(() => {
+      reported.push(connectivity.getIsOnline());
+    });
+
+    connectivity.reportFailure(TRANSPORT_FAILURE);
+    for (let cycle = 0; cycle < 4; cycle += 1) {
+      fireOldest(timers);
+      connectivity.reportFailure(TRANSPORT_FAILURE);
+    }
+
+    // The banner reads this value. If a probe moved it, the banner would flash green and back
+    // to red on every cycle for as long as the device had no network.
+    expect(reported).not.toContain(true);
+  });
+
+  it('stays offline when nothing retries at all, rather than forgetting after the delay', () => {
+    const { connectivity, timers } = setup();
+    connectivity.reportFailure(TRANSPORT_FAILURE);
+
+    // Nobody drains, because there is nothing queued. The probe comes due and goes unanswered.
+    fireOldest(timers);
+
+    expect(connectivity.getIsOnline()).toBe(false);
+  });
+
+  it('goes back online once the attempt the probe bought succeeds', () => {
+    const { connectivity, timers } = setup();
+    connectivity.reportFailure(TRANSPORT_FAILURE);
+    fireOldest(timers);
+    connectivity.reportSuccess();
     expect(connectivity.getIsOnline()).toBe(true);
+    expect(connectivity.getShouldAttempt()).toBe(true);
+  });
+
+  it('wakes its subscribers when the probe comes due, so something makes the attempt', () => {
+    const { connectivity, timers } = setup();
+    connectivity.reportFailure(TRANSPORT_FAILURE);
+    const listener = jest.fn();
+    connectivity.subscribe(listener);
+
+    fireOldest(timers);
+
+    expect(listener).toHaveBeenCalledTimes(1);
   });
 
   it('schedules only one probe no matter how many failures arrive', () => {

@@ -15,12 +15,15 @@ import { serverTaskOf } from './taskSyncFixtures';
 
 export interface FakeConnectivity extends ConnectivityService {
   setIsOnline(isNextOnline: boolean): void;
+  /** Grants the one attempt a probe buys, without claiming the network is back. */
+  setProbeDue(isNextProbeDue: boolean): void;
   readonly reportedFailures: ApiFailure[];
   readonly successCount: () => number;
 }
 
 export const createFakeConnectivity = (isInitiallyOnline = true): FakeConnectivity => {
   let isOnline = isInitiallyOnline;
+  let isProbeDue = false;
   let successes = 0;
   const listeners = new Set<() => void>();
   const reportedFailures: ApiFailure[] = [];
@@ -29,6 +32,7 @@ export const createFakeConnectivity = (isInitiallyOnline = true): FakeConnectivi
     reportedFailures,
     successCount: (): number => successes,
     getIsOnline: (): boolean => isOnline,
+    getShouldAttempt: (): boolean => isOnline || isProbeDue,
     subscribe: (listener: () => void): (() => void) => {
       listeners.add(listener);
       return () => {
@@ -46,6 +50,16 @@ export const createFakeConnectivity = (isInitiallyOnline = true): FakeConnectivi
         return;
       }
       isOnline = isNextOnline;
+      isProbeDue = false;
+      for (const listener of listeners) {
+        listener();
+      }
+    },
+    setProbeDue: (isNextProbeDue: boolean): void => {
+      if (isProbeDue === isNextProbeDue) {
+        return;
+      }
+      isProbeDue = isNextProbeDue;
       for (const listener of listeners) {
         listener();
       }

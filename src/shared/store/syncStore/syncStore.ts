@@ -15,7 +15,14 @@ export type SyncErrorKind = ApiFailure['kind'];
  * query cache and is never mirrored here (epic §11.2).
  */
 export interface SyncState {
+  /** What the app believes about the network. The only field the banner is allowed to read. */
   isOnline: boolean;
+  /**
+   * Whether a request is worth making now. It goes true on a timer after an outage, to buy the
+   * one attempt that can prove a network has recovered — which is why it is not `isOnline` and
+   * why nothing user-facing may render it.
+   */
+  shouldAttempt: boolean;
   pendingCount: number;
   /** The last failure the queue gave up on. Absent once nothing has failed. */
   lastError?: SyncErrorKind;
@@ -52,7 +59,11 @@ interface SyncStore extends SyncState {
  * Optimistic defaults, matching the connectivity service: with no evidence either way,
  * the app assumes it is online and shows no banner rather than flashing one on start.
  */
-export const SYNC_STORE_INITIAL_STATE: SyncState = { isOnline: true, pendingCount: 0 };
+export const SYNC_STORE_INITIAL_STATE: SyncState = {
+  isOnline: true,
+  shouldAttempt: true,
+  pendingCount: 0,
+};
 
 /**
  * The store singleton. Components never import it — they read through the selector hooks
@@ -64,7 +75,12 @@ export const useSyncStore = create<SyncStore>(set => ({
   setSyncState: (next: SyncState): void => {
     // `lastError` is spelled out rather than spread: zustand merges shallowly, so an
     // absent key would leave a stale error on screen after the failure was cleared.
-    set({ isOnline: next.isOnline, pendingCount: next.pendingCount, lastError: next.lastError });
+    set({
+      isOnline: next.isOnline,
+      shouldAttempt: next.shouldAttempt,
+      pendingCount: next.pendingCount,
+      lastError: next.lastError,
+    });
   },
   setFirstSyncError: (kind: SyncErrorKind | undefined): void => {
     set({ firstSyncError: kind });

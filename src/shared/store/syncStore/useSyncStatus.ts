@@ -9,6 +9,12 @@ import { useSyncStore } from './syncStore';
 
 export const useIsOnline = (): boolean => useSyncStore(state => state.isOnline);
 
+/**
+ * Read by the one effect that decides whether to attempt the first sync, and by nothing that
+ * renders — see the field's own note in `syncStore.ts`.
+ */
+export const useShouldAttempt = (): boolean => useSyncStore(state => state.shouldAttempt);
+
 export const usePendingCount = (): number => useSyncStore(state => state.pendingCount);
 
 export const useLastSyncError = (): SyncErrorKind | undefined =>

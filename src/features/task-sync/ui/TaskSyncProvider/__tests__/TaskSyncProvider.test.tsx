@@ -44,6 +44,26 @@ describe('TaskSyncProvider — the first sync', () => {
     });
   });
 
+  it('retries on the attempt a probe buys, while it still believes it is offline', async () => {
+    const harness = setupTaskSync({ isInitiallyOnline: false });
+    harness.pageSource.script([serverTaskOf('a1')]);
+    await renderHook(useTaskSyncBindings, { wrapper: harness.Wrapper });
+    expect(harness.pageSource.calls).toEqual([]);
+
+    // No connection has been established — only the one attempt the probe timer grants. With an
+    // empty queue this sync is the only request there is, so gating it on the belief would leave
+    // a cold start that failed offline waiting forever for evidence nothing could produce.
+    await act(async () => {
+      harness.connectivity.setProbeDue(true);
+      await Promise.resolve();
+    });
+
+    await waitFor(() => {
+      expect(harness.pageSource.calls).toHaveLength(1);
+    });
+    expect(useSyncStore.getState().isOnline).toBe(false);
+  });
+
   it('does not run a second time when the tree re-renders', async () => {
     const harness = setupTaskSync();
     harness.pageSource.script([serverTaskOf('a1')]);
@@ -54,7 +74,9 @@ describe('TaskSyncProvider — the first sync', () => {
 
     await act(async () => {
       await rerender(undefined);
-      useSyncStore.getState().setSyncState({ isOnline: true, pendingCount: 1 });
+      useSyncStore
+        .getState()
+        .setSyncState({ isOnline: true, shouldAttempt: true, pendingCount: 1 });
     });
 
     expect(harness.pageSource.calls).toHaveLength(1);

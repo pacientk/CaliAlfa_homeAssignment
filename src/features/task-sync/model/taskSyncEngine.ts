@@ -29,7 +29,14 @@ import type { TaskTransport } from './TaskTransport';
 export interface TaskSyncSnapshot {
   tasks: CachedTask[];
   pendingCount: number;
+  /** What the app believes about the network, and therefore what the banner may say. */
   isOnline: boolean;
+  /**
+   * Whether a request is worth making now — true while online, and for the single attempt a
+   * probe buys after an outage. The banner must not read this: it goes true on a timer, with
+   * nothing having happened to justify it.
+   */
+  shouldAttempt: boolean;
   /** The last failure that was given up on. Retryable failures never appear here. */
   lastFailure?: ApiFailure;
 }
@@ -94,6 +101,7 @@ export const createTaskSyncEngine = (dependencies: TaskSyncDependencies): TaskSy
     tasks,
     pendingCount: queue.length,
     isOnline: connectivity.getIsOnline(),
+    shouldAttempt: connectivity.getShouldAttempt(),
     ...(lastFailure === undefined ? {} : { lastFailure }),
   });
 
@@ -309,7 +317,7 @@ export const createTaskSyncEngine = (dependencies: TaskSyncDependencies): TaskSy
 
   /** Sends the head entry. Returns whether the loop should carry on to the next one. */
   const drainHead = async (): Promise<boolean> => {
-    if (!connectivity.getIsOnline()) {
+    if (!connectivity.getShouldAttempt()) {
       return false;
     }
     const head = queue[0];
@@ -348,7 +356,9 @@ export const createTaskSyncEngine = (dependencies: TaskSyncDependencies): TaskSy
 
   const unsubscribeConnectivity = connectivity.subscribe(() => {
     notify();
-    if (connectivity.getIsOnline()) {
+    // The permission, not the belief: a probe coming due is exactly the moment to try again,
+    // and it is the only thing that can turn a recovered network into evidence.
+    if (connectivity.getShouldAttempt()) {
       void drain();
     }
   });
